@@ -1,0 +1,2586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="SSケイリン ─ 遊んで覚える競輪入門ゲーム。A級3班からスタートし、S級S班・KEIRINグランプリ制覇を目指せ！">
+<meta property="og:title" content="SSケイリン 〜目指せSS 漢の中の漢道〜">
+<meta property="og:description" content="レースを走りながら競輪のルールが身につく無料ブラウザゲーム">
+<meta property="og:type" content="website">
+<title>SSケイリン 〜目指せSS 漢の中の漢道〜</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ── リセット & ベース ── */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --flame:#e8442e;--gold:#ffd34d;--bg:#07090f;--surface:#0d1220;
+  --card:#131c33;--border:#1e2d45;--text:#e8ecf6;--muted:#8d9cbe;
+  --dot-white:#f0f0f0;--dot-black:#1b1b1b;--dot-red:#e23a2e;
+  --dot-blue:#1d6fe0;--dot-yellow:#f2d022;--dot-green:#1d9e4f;
+  --dot-orange:#f07e1d;--dot-pink:#f06fae;--dot-purple:#8a5cd6;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;overflow-x:hidden;}
+
+/* ── ナビ ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 28px;
+  background:rgba(7,9,15,.82);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{
+  font-family:'DotGothic16',sans-serif;font-size:19px;letter-spacing:1px;
+  background:linear-gradient(to right,#ff6a1a,#ffd34d);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.nav-links{display:flex;gap:28px;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;transition:color .2s;}
+.nav-links a:hover{color:var(--text);}
+.nav-cta{
+  padding:9px 20px;background:linear-gradient(135deg,var(--flame),#d12a55);
+  border:none;border-radius:99px;color:#fff;font-weight:700;font-size:13px;
+  cursor:pointer;text-decoration:none;transition:opacity .15s;
+}
+.nav-cta:hover{opacity:.85;}
+
+/* ── ヒーロー ── */
+#hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:120px 24px 80px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;pointer-events:none;overflow:hidden;
+}
+/* 炎エフェクト */
+.flame-strip{
+  position:absolute;bottom:-30px;left:0;right:0;height:48vh;
+  background:radial-gradient(ellipse at 50% 120%,rgba(232,68,46,.38),rgba(232,68,46,0) 68%);
+}
+.flame-particle{
+  position:absolute;bottom:-20px;border-radius:50% 50% 48% 48%/64% 64% 36% 36%;
+  background:linear-gradient(to top,#ffd34d 0%,#ff8a2e 38%,#e8442e 70%,rgba(209,42,46,0) 100%);
+  filter:blur(6px);opacity:.7;mix-blend-mode:screen;
+  animation:flameUp 1.4s ease-in-out infinite;
+}
+@keyframes flameUp{
+  0%,100%{transform:scaleY(1) scaleX(1) translateY(0);opacity:.68;}
+  25%{transform:scaleY(1.28) scaleX(.86) translateY(-10px);opacity:.9;}
+  55%{transform:scaleY(.8) scaleX(1.1) translateY(2px);opacity:.6;}
+  75%{transform:scaleY(1.14) scaleX(.92) translateY(-6px);opacity:.84;}
+}
+/* 速度ライン */
+.speed-lines{position:absolute;inset:0;}
+.speed-line{
+  position:absolute;top:0;height:100%;
+  width:1px;background:linear-gradient(to bottom,transparent 0%,rgba(232,68,46,.18) 50%,transparent 100%);
+  animation:speedLine 3.2s linear infinite;
+}
+@keyframes speedLine{from{transform:translateY(-100%);}to{transform:translateY(100%);}}
+
+.hero-badge{
+  display:inline-block;font-size:11.5px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;
+  border:1px solid var(--border);padding:5px 16px;border-radius:99px;
+  background:rgba(19,28,51,.6);margin-bottom:28px;
+}
+.hero-title{
+  font-family:'DotGothic16',sans-serif;font-size:clamp(48px,10vw,88px);
+  letter-spacing:4px;line-height:1;
+  background:linear-gradient(to top,#ff6a1a 0%,#ffd34d 45%,#fff5cc 80%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 28px rgba(255,138,46,.55));
+  animation:titleFlicker 2.8s ease-in-out infinite;
+  margin-bottom:12px;
+}
+@keyframes titleFlicker{
+  0%,100%{filter:drop-shadow(0 0 24px rgba(255,138,46,.55)) brightness(1);}
+  45%{filter:drop-shadow(0 0 42px rgba(255,180,60,.9)) brightness(1.18);}
+  70%{filter:drop-shadow(0 0 16px rgba(255,100,40,.4)) brightness(.92);}
+}
+.hero-sub{
+  font-size:15px;color:#ffcaa0;letter-spacing:4px;font-weight:700;
+  margin-bottom:32px;text-shadow:0 0 14px rgba(232,68,46,.4);
+}
+.hero-dots{display:flex;justify-content:center;gap:10px;margin-bottom:48px;}
+.hero-dot{
+  width:20px;height:20px;border-radius:50%;border:2px solid rgba(0,0,0,.5);
+  animation:dotBounce 1.6s infinite;
+}
+@keyframes dotBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.hero-desc{
+  max-width:520px;font-size:15px;line-height:1.9;color:var(--muted);
+  margin-bottom:44px;
+}
+.hero-cta{
+  display:inline-block;padding:20px 56px;
+  background:linear-gradient(135deg,var(--flame),#d12a55);
+  border:none;border-radius:16px;font-family:'DotGothic16',sans-serif;
+  font-size:22px;letter-spacing:2px;color:#fff;cursor:pointer;
+  box-shadow:0 6px 32px rgba(232,68,46,.5);
+  animation:ctaPulse 1.8s infinite;
+  text-decoration:none;transition:transform .1s;
+}
+.hero-cta:active{transform:scale(.97);}
+@keyframes ctaPulse{0%,100%{box-shadow:0 6px 32px rgba(232,68,46,.5);}50%{box-shadow:0 6px 52px rgba(232,68,46,.85);}}
+.hero-note{margin-top:16px;font-size:11.5px;color:var(--muted);}
+
+/* ── 車番ランナー ── */
+.car-runner{
+  width:100%;overflow:hidden;padding:20px 0;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  background:var(--surface);
+}
+.car-runner-inner{
+  display:flex;gap:18px;width:max-content;
+  animation:runner 16s linear infinite;
+}
+@keyframes runner{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.car-chip{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:9px;
+  font-family:'DotGothic16',sans-serif;font-size:17px;font-weight:800;
+  border:2px solid rgba(0,0,0,.4);flex-shrink:0;
+}
+
+/* ── 説明セクション ── */
+.section{padding:96px 24px;}
+.section-inner{max-width:1080px;margin:0 auto;}
+.section-label{
+  font-size:11px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--flame);font-weight:800;margin-bottom:14px;
+}
+.section-title{
+  font-family:'DotGothic16',sans-serif;font-size:clamp(26px,4vw,40px);
+  letter-spacing:2px;margin-bottom:20px;
+}
+.section-body{font-size:14.5px;line-height:2;color:var(--muted);max-width:640px;}
+
+/* ── フィーチャーグリッド ── */
+.feature-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;margin-top:56px;
+}
+.feature-card{
+  background:var(--card);border:1px solid var(--border);border-radius:18px;
+  padding:28px 24px;transition:border-color .2s,transform .2s;
+}
+.feature-card:hover{border-color:var(--flame);transform:translateY(-3px);}
+.feature-icon{font-size:38px;margin-bottom:16px;display:block;}
+.feature-title{font-family:'DotGothic16',sans-serif;font-size:17px;margin-bottom:10px;letter-spacing:1px;}
+.feature-desc{font-size:13px;line-height:1.85;color:var(--muted);}
+
+/* ── ランク階段 ── */
+.rank-ladder{display:flex;gap:10px;flex-wrap:wrap;margin-top:40px;align-items:flex-end;}
+.rank-rung{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:12px 16px;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;min-width:80px;transition:all .2s;
+}
+.rank-rung:hover{border-color:var(--gold);}
+.rank-rung.top{background:linear-gradient(135deg,#2a2310,#1f1d12);border-color:var(--gold);}
+.rank-rung-label{font-family:'DotGothic16',sans-serif;font-size:13px;color:var(--text);}
+.rank-rung-pts{font-size:10px;color:var(--muted);}
+.rank-arrow{color:var(--flame);font-size:18px;align-self:center;}
+
+/* ── ハウツー ── */
+.howto-steps{display:flex;flex-direction:column;gap:20px;margin-top:40px;}
+.howto-step{
+  display:flex;gap:20px;align-items:flex-start;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;
+}
+.step-num{
+  font-family:'DotGothic16',sans-serif;font-size:26px;color:var(--flame);
+  flex-shrink:0;min-width:32px;
+}
+.step-body{flex:1;}
+.step-title{font-weight:700;font-size:15px;margin-bottom:5px;}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.75;}
+
+/* ── プレイエリア ── */
+#play{background:var(--surface);padding:80px 0 0;}
+.play-header{text-align:center;padding:0 24px 48px;}
+.play-frame{
+  max-width:480px;margin:0 auto;
+  box-shadow:0 0 80px rgba(232,68,46,.25);
+  border-radius:0;
+  overflow:hidden;
+  position:relative;
+}
+#game-root{min-height:100vh;}
+.game-loading{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:60vh;gap:20px;
+}
+.game-loading .spinner{
+  width:48px;height:48px;border:3px solid var(--border);
+  border-top-color:var(--flame);border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.game-loading p{font-family:'DotGothic16',sans-serif;font-size:16px;color:var(--muted);letter-spacing:2px;}
+
+/* ── フッター ── */
+footer{
+  text-align:center;padding:48px 24px;
+  border-top:1px solid var(--border);
+  background:var(--bg);
+}
+.footer-logo{
+  font-family:'DotGothic16',sans-serif;font-size:22px;
+  background:linear-gradient(to right,#ff6a1a,#ffd34d);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:10px;
+}
+footer p{font-size:12px;color:var(--muted);line-height:2;}
+
+/* ── レスポンシブ ── */
+@media(max-width:640px){
+  nav{padding:12px 16px;}
+  .nav-links{display:none;}
+  .section{padding:64px 16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ナビゲーション -->
+<nav>
+  <div class="nav-logo">SSケイリン</div>
+  <div class="nav-links">
+    <a href="#about">競輪とは</a>
+    <a href="#features">特徴</a>
+    <a href="#howto">遊び方</a>
+    <a href="#play">プレイ</a>
+  </div>
+  <a href="#play" class="nav-cta">今すぐプレイ ▶</a>
+</nav>
+
+<!-- ヒーロー -->
+<section id="hero">
+  <div class="hero-bg">
+    <!-- 速度ライン -->
+    <div class="speed-lines" id="speedLines"></div>
+    <!-- 炎 -->
+    <div id="flames"></div>
+    <div class="flame-strip"></div>
+  </div>
+
+  <div class="hero-badge">遊んで覚える競輪入門ゲーム</div>
+  <h1 class="hero-title">SSケイリン</h1>
+  <div class="hero-sub">〜 目指せSS 漢の中の漢道 〜</div>
+
+  <!-- 車番ドット -->
+  <div class="hero-dots" id="heroDots"></div>
+
+  <p class="hero-desc">
+    A級3班のルーキーから、たった9人の頂点<strong style="color:#ffd34d">「S級S班」</strong>へ。<br>
+    レースを走るたびに競輪のルールと駆け引きが身につく、<br>本格ブラウザゲームです。
+  </p>
+
+  <a href="#play" class="hero-cta">🏁 今すぐ無料プレイ</a>
+  <p class="hero-note">ブラウザで動作 ／ インストール不要 ／ 無料</p>
+</section>
+
+<!-- 車番ランナー -->
+<div class="car-runner">
+  <div class="car-runner-inner" id="carRunner"></div>
+</div>
+
+<!-- 競輪とは -->
+<section class="section" id="about">
+  <div class="section-inner">
+    <div class="section-label">What is Keirin?</div>
+    <h2 class="section-title">競輪って何だ？</h2>
+    <p class="section-body">
+      9人の選手が自転車でバンク（専用走路）を5周・約2000m走り、着順を競うプロスポーツ。<br><br>
+      時速70km近い世界だが、ただ速いだけでは勝てない。<strong style="color:var(--text)">風よけ・ライン・仕掛けのタイミング</strong>といった駆け引きが勝敗を分ける「走るボードゲーム」だ。
+    </p>
+
+    <div class="feature-grid" style="margin-top:40px;">
+      <div class="feature-card">
+        <span class="feature-icon">🌬</span>
+        <div class="feature-title">風よけ</div>
+        <div class="feature-desc">前の選手の真後ろにつくと空気抵抗が大きく減り、スタミナ消費を3〜5割節約できる。高速レースではこれがすべての基本。</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🤝</span>
+        <div class="feature-title">ライン</div>
+        <div class="feature-desc">同じ地区の選手が前後一列に組む即席チーム。先頭が風を受けて引き、後ろが脚を溜める。ただし最後の直線では仲間でも勝負する。</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🔔</span>
+        <div class="feature-title">ジャン（打鐘）</div>
+        <div class="feature-desc">残り1周半で鳴る鐘。ここからレースが一気に動き出す「仕掛けどころ」の合図。タイミングが勝負の分かれ目。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 特徴 -->
+<section class="section" id="features" style="background:var(--surface);padding-top:80px;padding-bottom:80px;">
+  <div class="section-inner">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">このゲームでできること</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🚴</span>
+        <div class="feature-title">リアルなレース</div>
+        <div class="feature-desc">9車立てのCanvas描画レース。位置取り・スパートタイミング・連打でペダルを踏む本格的な操作感。風よけ率・上がりタイムが成績に反映される。</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">💪</span>
+        <div class="feature-title">育成・昇格</div>
+        <div class="feature-desc">パワー・スピード・スタミナ・テクニックを練習で鍛え、先輩「轟 鉄平」の指導を受けながらA級3班からS級S班へ昇格を目指す。</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🆚</span>
+        <div class="feature-title">オンライン対戦</div>
+        <div class="feature-desc">全国のプレイヤーと同じ9車立てのレースで直接対決。相手が実際に走り、着順で勝敗が決まる本格対戦モード。</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🏁</span>
+        <div class="feature-title">全国ランキング</div>
+        <div class="feature-desc">ラスト200mの「上がりタイム」を全国のプレイヤーと競う。風よけ・タイミング・連打の精度を磨いて記録更新を狙え。</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🛒</span>
+        <div class="feature-title">日替わりショップ</div>
+        <div class="feature-desc">獲得賞金でカーボンフレームや軽量ホイールを購入。毎日品揃えが変わり、その日だけの特価品も登場する。</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📖</span>
+        <div class="feature-title">競輪が学べる</div>
+        <div class="feature-desc">チュートリアルと先輩のフィードバックを通じて競輪の基本ルールが自然に身につく。初めて競輪を知る方にも最適。</div>
+      </div>
+    </div>
+
+    <!-- 級班ラダー -->
+    <div style="margin-top:64px;">
+      <div class="section-label">Rank System</div>
+      <h3 class="section-title" style="font-size:24px;">A級3班から頂点へ</h3>
+      <div class="rank-ladder">
+        <div class="rank-rung"><div class="rank-rung-label">A3班</div><div class="rank-rung-pts">F2戦</div></div>
+        <div class="rank-arrow">→</div>
+        <div class="rank-rung"><div class="rank-rung-label">A2班</div><div class="rank-rung-pts">F2戦</div></div>
+        <div class="rank-arrow">→</div>
+        <div class="rank-rung"><div class="rank-rung-label">A1班</div><div class="rank-rung-pts">F1戦</div></div>
+        <div class="rank-arrow">→</div>
+        <div class="rank-rung"><div class="rank-rung-label">S2班</div><div class="rank-rung-pts">G3戦</div></div>
+        <div class="rank-arrow">→</div>
+        <div class="rank-rung"><div class="rank-rung-label">S1班</div><div class="rank-rung-pts">G1戦</div></div>
+        <div class="rank-arrow">→</div>
+        <div class="rank-rung top"><div class="rank-rung-label" style="color:#ffd34d">👑SS班</div><div class="rank-rung-pts" style="color:#c9a227">グランプリ</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 遊び方 -->
+<section class="section" id="howto">
+  <div class="section-inner">
+    <div class="section-label">How to Play</div>
+    <h2 class="section-title">遊び方</h2>
+    <div class="howto-steps">
+      <div class="howto-step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">選手を作る</div>
+          <div class="step-desc">名前・地区・脚質（逃げ／捲り／差し）を選んで選手を登録。脚質で得意な戦い方が決まる。</div>
+        </div>
+      </div>
+      <div class="howto-step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">練習で強くなる</div>
+          <div class="step-desc">もがき練習・バンク走行・街道練習などでパラメータを鍛える。体調管理も重要で、疲労が溜まるとレースに影響する。</div>
+        </div>
+      </div>
+      <div class="howto-step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">作戦を立ててレースへ</div>
+          <div class="step-desc">先行・番手・捲り・追い込みから作戦を選択。出走表でラインと対戦相手の脚質を読んで有利な展開を作る。</div>
+        </div>
+      </div>
+      <div class="howto-step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">レース本番</div>
+          <div class="step-desc">▲▼ボタンで位置取りを調整し、風よけでスタミナを温存。ジャン（打鐘）後にスパートボタンを押して、あとは全力連打！</div>
+        </div>
+      </div>
+      <div class="howto-step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-title">勝って昇格を目指す</div>
+          <div class="step-desc">着順に応じて競走得点と賞金を獲得。得点を積み上げて上位クラスへ昇格し、最終的にKEIRINグランプリ制覇を目指せ！</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- プレイエリア -->
+<section id="play">
+  <div class="play-header">
+    <div class="section-label">Free to Play</div>
+    <h2 class="section-title">プレイする</h2>
+    <p style="color:var(--muted);font-size:13.5px;line-height:1.8;">ブラウザで今すぐ遊べます。セーブデータはこのブラウザに保存されます。</p>
+  </div>
+  <div class="play-frame">
+    <div id="game-root">
+      <div class="game-loading">
+        <div class="spinner"></div>
+        <p>ゲームを読み込み中…</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- フッター -->
+<footer>
+  <div class="footer-logo">SSケイリン</div>
+  <p>〜 目指せSS 漢の中の漢道 〜<br>
+  遊んで覚える競輪入門ブラウザゲーム<br>
+  <span style="opacity:.5;font-size:11px;">© SSケイリン. Powered by React.</span></p>
+</footer>
+
+<!-- React + ReactDOM + Babel -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- ページ装飾 JS -->
+<script>
+// 車番カラー
+const COLORS=[
+  {bg:"#f0f0f0",fg:"#111"},{bg:"#1b1b1b",fg:"#fff"},{bg:"#e23a2e",fg:"#fff"},
+  {bg:"#1d6fe0",fg:"#fff"},{bg:"#f2d022",fg:"#222"},{bg:"#1d9e4f",fg:"#fff"},
+  {bg:"#f07e1d",fg:"#fff"},{bg:"#f06fae",fg:"#fff"},{bg:"#8a5cd6",fg:"#fff"},
+];
+
+// ヒーロー 車番ドット
+const dotsEl=document.getElementById('heroDots');
+COLORS.forEach((c,i)=>{
+  const span=document.createElement('span');
+  span.className='hero-dot';
+  span.style.background=c.bg;
+  span.style.border=i===0?'2px solid #aaa':'2px solid #0b0e18';
+  span.style.animationDelay=(i*0.14)+'s';
+  dotsEl.appendChild(span);
+});
+
+// 車番ランナー（×2でループ）
+const runnerEl=document.getElementById('carRunner');
+for(let rep=0;rep<2;rep++){
+  [1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9].forEach((n,i)=>{
+    const c=COLORS[n-1];
+    const chip=document.createElement('span');
+    chip.className='car-chip';
+    chip.style.background=c.bg;chip.style.color=c.fg;
+    if(n===1)chip.style.border='2px solid #aaa';
+    chip.textContent=n;
+    runnerEl.appendChild(chip);
+  });
+}
+
+// 炎パーティクル
+const flamesEl=document.getElementById('flames');
+for(let i=0;i<26;i++){
+  const w=14+(i%4)*10, h=55+(i%6)*36;
+  const span=document.createElement('span');
+  span.className='flame-particle';
+  span.style.left=(i*3.9-1)+'%';
+  span.style.width=w+'px'; span.style.height=h+'px';
+  span.style.animationDelay=(i%7)*0.18+'s';
+  span.style.animationDuration=(1.1+(i%5)*0.22)+'s';
+  flamesEl.appendChild(span);
+}
+
+// 速度ライン
+const slEl=document.getElementById('speedLines');
+for(let i=0;i<16;i++){
+  const line=document.createElement('div');
+  line.className='speed-line';
+  line.style.left=(i*6.5)+'%';
+  line.style.animationDuration=(2.4+(i%4)*0.6)+'s';
+  line.style.animationDelay=(-i*0.3)+'s';
+  line.style.opacity=(0.04+(i%3)*0.03);
+  slEl.appendChild(line);
+}
+</script>
+
+<!-- ゲーム本体（Babel JSX） -->
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+/* ==============================================================
+   SSケイリン 〜目指せSS 漢の中の漢道〜 v3
+   ============================================================== */
+
+// ─── 車番カラー ────────────────────────────────────────────────
+const CAR_COLORS = [null,
+  {bg:"#f0f0f0",fg:"#111",name:"白"},{bg:"#1b1b1b",fg:"#fff",name:"黒"},
+  {bg:"#e23a2e",fg:"#fff",name:"赤"},{bg:"#1d6fe0",fg:"#fff",name:"青"},
+  {bg:"#f2d022",fg:"#222",name:"黄"},{bg:"#1d9e4f",fg:"#fff",name:"緑"},
+  {bg:"#f07e1d",fg:"#fff",name:"橙"},{bg:"#f06fae",fg:"#fff",name:"桃"},
+  {bg:"#8a5cd6",fg:"#fff",name:"紫"},
+];
+
+// ─── 級班 ────────────────────────────────────────────────────
+const RANKS=["A3","A2","A1","S2","S1","SS"];
+const RANK_LABEL={A3:"A級3班",A2:"A級2班",A1:"A級1班",S2:"S級2班",S1:"S級1班",SS:"S級S班"};
+const RANK_REQ={A3:120,A2:240,A1:420,S2:650,S1:950};
+const RANK_MULT={A3:1,A2:1.2,A1:1.5,S2:1.9,S1:2.4,SS:3};
+const GRADE_LABEL={A3:"F2戦",A2:"F2戦",A1:"F1戦",S2:"G3戦",S1:"G1戦",SS:"KEIRINグランプリ"};
+const RANK_BAND={A3:[38,58],A2:[50,68],A1:[60,78],S2:[68,86],S1:[78,96],SS:[92,114]};
+const PLACE_PTS=[32,26,21,17,14,11,9,7,5];
+const PLACE_MONEY=[70,42,30,22,16,12,9,7,5];
+
+// ─── 脚質 ──────────────────────────────────────────────────
+const STYLES={
+  nige:{label:"逃げ",b:{pow:10,spd:3,sta:7,tec:0},desc:"先頭を駆ける自力型。風を受けても押し切るパワーとスタミナが武器。"},
+  makuri:{label:"捲り",b:{pow:7,spd:9,sta:2,tec:2},desc:"中団に構え、終盤に一気に外から襲いかかるスピード型。"},
+  sashi:{label:"差し",b:{pow:2,spd:6,sta:2,tec:10},desc:"前の選手の風よけを利用して脚を溜め、最後の直線で差し切る技巧派。"},
+};
+
+// ─── 作戦 ──────────────────────────────────────────────────
+const STRATS=[
+  {id:"senko",label:"先行勝負",pref:1,slot:0,hint:"ジャン前後で早めにスパート！",desc:"ラインの先頭で風を受けながら押し切る王道自力戦。"},
+  {id:"bante",label:"番手戦",pref:2,slot:1,hint:"残り250〜350mでスパート！",desc:"味方の逃げ選手の直後＝風よけ特等席。脚を溜めて最後に差す。"},
+  {id:"makuri",label:"捲り狙い",pref:5,slot:-1,hint:"残り350〜450mで外を踏む！",desc:"中団単騎で構え、終盤に外からまとめて抜き去る。"},
+  {id:"oikomi",label:"追い込み",pref:7,slot:-1,hint:"残り250mまで我慢して直線一気！",desc:"後方で温存し、ゴール前の末脚にすべてを賭ける。"},
+];
+
+// ─── 練習 ──────────────────────────────────────────────────
+const TRAININGS=[
+  {id:"pow",name:"もがき練習",icon:"💥",stat:"pow",fat:24,desc:"全力ダッシュ反復。パワーが上がる"},
+  {id:"spd",name:"バンク走行",icon:"⚡",stat:"spd",fat:24,desc:"実戦バンクで高速巡航。スピードが上がる"},
+  {id:"sta",name:"街道練習",icon:"🛣",stat:"sta",fat:24,desc:"長距離走り込み。スタミナが上がる"},
+  {id:"tec",name:"競走訓練",icon:"🧠",stat:"tec",fat:24,desc:"位置取りと風よけの技術が上がる"},
+  {id:"rest",name:"完全休養",icon:"🛌",stat:null,fat:-45,desc:"疲労をしっかり回復。体調を整える"},
+];
+const STAT_LABEL={pow:"パワー",spd:"スピード",sta:"スタミナ",tec:"テクニック"};
+
+// ─── ショップ ────────────────────────────────────────────────
+const SHOP_ITEMS=[
+  // パーツ
+  {id:"light_wheel",cat:"parts",name:"軽量ホイール",icon:"🔵",price:50,desc:"空気抵抗を削る超軽量ホイール",stat:"spd",bonus:3},
+  {id:"carbon_frame",cat:"parts",name:"カーボンフレーム",icon:"⚫",price:180,desc:"超軽量・高剛性フレーム",stat:"spd",bonus:3,stat2:"sta",bonus2:2},
+  {id:"aero_bar",cat:"parts",name:"エアロハンドル",icon:"🔧",price:60,desc:"空力ポジションで差し込みが鋭く",stat:"tec",bonus:2},
+  {id:"pro_crank",cat:"parts",name:"プロ仕様クランク",icon:"⚙️",price:75,desc:"踏み込みの力を推進力に直結",stat:"pow",bonus:3},
+  // ファッション
+  {id:"train_wear",cat:"fashion",name:"練習ウェア",icon:"👕",price:10,desc:"毎日の練習に欠かせない一着"},
+  {id:"race_jersey",cat:"fashion",name:"レーシングジャージ",icon:"🧥",price:30,desc:"本格レース仕様。気合が入る"},
+  {id:"brand_suit",cat:"fashion",name:"ブランドスーツ",icon:"🤵",price:120,desc:"表彰式に映える高級スーツ"},
+  {id:"full_order",cat:"fashion",name:"フルオーダーウェア",icon:"✨",price:350,desc:"一点物の職人仕上げ。もはやアート"},
+  // 乗り物
+  {id:"kei_car",cat:"car",name:"中古軽自動車",icon:"🚗",price:30,desc:"競輪選手として初めての愛車！"},
+  {id:"sports_car",cat:"car",name:"国産スポーツカー",icon:"🏎",price:350,desc:"勝ち進む選手にふさわしい一台"},
+  {id:"import_car",cat:"car",name:"欧州輸入高級車",icon:"🚘",price:1200,desc:"成功を手に入れた証"},
+  {id:"super_car",cat:"car",name:"スーパーカー",icon:"💥",price:5000,desc:"SS班の選手にしか買えない夢の車"},
+  {id:"hyper_car",cat:"car",name:"億超えハイパーカー",icon:"💎",price:15000,desc:"グランプリ制覇記念の究極の一台"},
+];
+
+// ─── Google AdSense 設定 ─────────────────────────────────────
+const ADSENSE_CLIENT           = "ca-pub-5021031352922084";
+const ADSENSE_SLOT_BANNER      = "9079432179";   // レース中バナー
+const ADSENSE_SLOT_INTERSTITIAL= "8915780643";   // レース後インタースティシャル
+
+// ─── 広告スペース（競輪場バックボード用看板テキスト）────────────
+const ADS=[
+  {text:"Google Ads",        bg:"#1a73e8",fg:"#fff"},
+  {text:"Powered by AdSense",bg:"#34a853",fg:"#fff"},
+  {text:"SSケイリン",        bg:"#f2d022",fg:"#222"},
+  {text:"広告掲載中",        bg:"#ea4335",fg:"#fff"},
+  {text:"AD",                bg:"#f07e1d",fg:"#fff"},
+  {text:"競輪を、漢の道へ",  bg:"#8a5cd6",fg:"#fff"},
+];
+
+// ─── 日替わりショップ ────────────────────────────────────────
+function daySeed(){return Math.floor(Date.now()/86400000);}
+function hashId(s,seed){let h=(seed*2654435761)>>>0;for(let i=0;i<s.length;i++){h=((h^s.charCodeAt(i))*16777619)>>>0;}return h>>>0;}
+function shopToday(seed){
+  const stock={};
+  const dealIdx=seed%SHOP_ITEMS.length;
+  SHOP_ITEMS.forEach((it,idx)=>{stock[it.id]={inStock:(hashId(it.id,seed)%10)<7,deal:idx===dealIdx};});
+  ["parts","fashion","car"].forEach(cat=>{
+    const cheapest=SHOP_ITEMS.filter(i=>i.cat===cat).sort((a,b)=>a.price-b.price)[0];
+    if(cheapest)stock[cheapest.id].inStock=true;
+  });
+  const dealItem=SHOP_ITEMS[dealIdx];if(dealItem)stock[dealItem.id].inStock=true;
+  return stock;
+}
+function dealPrice(item,today){return today[item.id]&&today[item.id].deal?Math.round(item.price*0.8):item.price;}
+
+// ─── 競輪場 ───────────────────────────────────────────────────
+const VENUES=[
+  {id:"north",name:"北輪スタジアム",loc:"北日本",sky:["#0a1326","#102844"],crowd:"#34507e",accent:"#62b6ff"},
+  {id:"east",name:"東輪ドローム",loc:"南関東",sky:["#191023","#2a1838"],crowd:"#4a3a64",accent:"#ff8a65"},
+  {id:"naniwa",name:"浪速バンク",loc:"近畿",sky:["#1a1608","#2e2410"],crowd:"#5a4a28",accent:"#ffd54f"},
+  {id:"kyushu",name:"九州メモリアル",loc:"九州",sky:["#08160e","#10261a"],crowd:"#2a4a38",accent:"#5bd08a"},
+  {id:"central",name:"中京ベロドローム",loc:"中部",sky:["#0e1420","#1c2636"],crowd:"#3a4656",accent:"#81c784"},
+  {id:"seto",name:"瀬戸内アリーナ",loc:"四国",sky:["#101820","#1a2c34"],crowd:"#2e4a52",accent:"#4dd0e1"},
+];
+
+// ─── インタビューQ&A ─────────────────────────────────────────
+const WIN_QA=[
+  {q:"今日のレースを振り返って、いかがでしたか？",opts:[
+    {t:"完璧でした！作戦通りの走りができました",sm:"smug",st:"ほう、余裕があるじゃねえか。…その自信、いつまでも持ち続けろ。"},
+    {t:"キツかったですが、絶対に負けたくなかった！",sm:"happy",st:"その気持ちだよ！苦しい時こそ、本物の強さが出る！"},
+    {t:"ライバルが強くて最後まで焦りました…",sm:"calm",st:"正直に話せるのも強さだ。次はもっと余裕を持って走れ。"},
+  ]},
+  {q:"ライバル選手にひとことどうぞ！",opts:[
+    {t:"次は絶対に勝ちます！悔しがってください！",sm:"happy",st:"それでいい！宣戦布告は堂々とやれ！！"},
+    {t:"皆さんのおかげで本当に成長できています",sm:"calm",st:"謙虚さも大事だが…ちっとは吠えろ（笑）。"},
+    {t:"SS班で待っています！",sm:"smug",st:"…いいタンカだ。その言葉を嘘にするなよ。"},
+  ]},
+  {q:"勝因はずばり何でしたか？",opts:[
+    {t:"日々の練習がすべてです。嘘はつきません",sm:"happy",st:"練習は裏切らねえ。お前はそれを証明したんだ。"},
+    {t:"風よけをうまく使えたのが大きいです",sm:"smug",st:"位置取りが分かってきたな。それが競輪の頭脳ってやつだ。"},
+    {t:"最後は気合と根性です！",sm:"angry",st:"ガハハ！結局そこよ！漢はハートで走るんだ！"},
+  ]},
+  {q:"沿道のファンに向けてメッセージを！",opts:[
+    {t:"声援が背中を押してくれました。感謝です！",sm:"calm",st:"ファンあっての競輪だ。その気持ち、忘れんなよ。"},
+    {t:"これからも応援、よろしくお願いします！",sm:"happy",st:"いい顔だ。ファンサービスも一流選手の仕事だぜ。"},
+    {t:"次も勝つので賭けてください！",sm:"shock",st:"おいおい、車券の宣伝はほどほどにしとけ（笑）。"},
+  ]},
+  {q:"自分の走りに点数をつけるなら？",opts:[
+    {t:"100点満点です！文句なしです",sm:"angry",st:"満点だと？上には上がいる。天狗になった奴から落ちていくんだ。"},
+    {t:"80点。まだ伸びしろがあります",sm:"smug",st:"その冷静さ、悪くねえ。伸びしろを自覚できる奴は強くなる。"},
+    {t:"勝てたので合格点でいいかなと",sm:"calm",st:"勝ちにこだわるのはいいことだ。だが内容も見直しとけ。"},
+  ]},
+  {q:"次の目標を聞かせてください！",opts:[
+    {t:"もちろん全国制覇、SS班です！",sm:"happy",st:"でけえ目標は漢の証だ。その背中、追わせてもらうぜ。"},
+    {t:"一戦一戦を大事に積み重ねます",sm:"smug",st:"足元を見れる奴は強い。コツコツが一番こええんだ。"},
+    {t:"上がりタイムの記録更新を狙います",sm:"calm",st:"タイムを意識するか。プロの目線になってきたじゃねえか。"},
+  ]},
+  {q:"ご自身の脚質について手応えは？",opts:[
+    {t:"自分の武器を出し切れました",sm:"happy",st:"自分の型を持ってる奴は強い。それを磨き続けろ。"},
+    {t:"まだ別の脚質も練習中です",sm:"smug",st:"オールラウンダー狙いか。欲張りだが…嫌いじゃねえ。"},
+    {t:"先輩の教え通りに走っただけです",sm:"calm",st:"…おう。だが勝ったのはお前の脚だ。胸を張れ。"},
+  ]},
+];
+
+// ─── 先輩 ────────────────────────────────────────────────────
+const SENPAI_NAME="轟 鉄平";
+const SENPAI_MOOD={angry:"😠",smug:"😏",happy:"😁",shock:"😳",calm:"🤨"};
+const SENPAI_TRAIN=[
+  {m:"angry",t:"フォームが硬えぞ！肩の力を抜け！"},
+  {m:"smug",t:"おう、サボってないか見に来たぜ。…ちゃんとやってんな。"},
+  {m:"happy",t:"いい汗だ。その一踏みが本番の武器になる。"},
+  {m:"calm",t:"メシと睡眠も練習のうちだ。疲労を溜めすぎるなよ。"},
+  {m:"angry",t:"声が小せえ！気合入れていけ！！"},
+  {m:"calm",t:"バンクは正直だ。やった分しか速くならねえ。"},
+  {m:"happy",t:"おっ、今の踏み込みは良かったぞ。体が覚えてきたな。"},
+  {m:"smug",t:"汗の量は嘘つかねえ。…まあ、悪くねえ追い込みだ。"},
+  {m:"angry",t:"ペダルを撫でるな、踏み潰せ！もっと体重を乗せろ！"},
+  {m:"calm",t:"焦んなくていい。強え選手ほど、地味な反復を大事にする。"},
+  {m:"happy",t:"その目つきになってきたな。漢の顔だ。"},
+  {m:"smug",t:"昔の俺を見てるようだぜ。…まだまだ足りねえけどな。"},
+  {m:"angry",t:"休むな、と言いてえとこだが…無理は禁物だ。加減を覚えろ。"},
+  {m:"calm",t:"練習は裏切らねえ。今日の一本が、半年後のお前を作る。"},
+];
+function senpaiFeedback(tele,place){
+  const pct=Math.round(tele.runSec>1?tele.draftSec/tele.runSec*100:0);
+  if(place===1&&!tele.tired) return {m:"happy",t:"完璧な勝ち方だ！…って調子に乗るなよ？次も同じ走りができて本物だ。"};
+  if(place===1) return {m:"smug",t:"勝ちは勝ちだ！だが最後タレてたな。スタミナ配分まで含めて完璧を目指せ。"};
+  if(tele.tired&&tele.spurtRem!==null&&tele.spurtRem>520) return {m:"angry",t:"ジャンと同時に全開たぁ猪かお前は！早駆けで押し切りてえならスタミナを鍛え直せ！"};
+  if(tele.tired) return {m:"angry",t:"踏みっぱなしじゃ脚が保たねえ！連打を少し休んで脚を溜める『勇気』も覚えろ！"};
+  if(pct<35&&place>=4) return {m:"angry",t:`ずっと一人で風を受けてただろ（風よけ率${pct}%）！前の奴のケツにピタッと付く、それが風よけだ！`};
+  if(tele.spurtRem!==null&&tele.spurtRem<160&&place>=4) return {m:"shock",t:"仕掛けが遅すぎる！残り300mを過ぎたら勝負を意識しろ！"};
+  if(place<=3&&pct>55) return {m:"smug",t:`風よけ率${pct}%、使い方が様になってきたじゃねえか。脚を溜めて最後に出る…競輪の基本だ。`};
+  if(place<=3) return {m:"smug",t:"悪くねえ走りだ。だが上にはまだ化け物がいるぞ。"};
+  if(place>=7) return {m:"angry",t:"話にならねえ！…まあ、誰でも最初はそんなもんだ。位置取りと風よけ、基本からやり直しだ！"};
+  return {m:"calm",t:"中位か。展開を読んで、もう一列前で勝負してみな。"};
+}
+
+// ─── 図鑑 ────────────────────────────────────────────────────
+const ZUKAN=[
+  {id:"keirin",t:"競輪とは",icon:"🚴",body:"9人の選手が自転車でバンク5周・約2000mを走り、着順を競うプロスポーツ。時速70km近い高速戦だが、ただ速いだけでは勝てない。風よけ・ライン・仕掛けのタイミングといった駆け引きが勝敗を分ける「走るボードゲーム」だ。"},
+  {id:"pacer",t:"誘導員",icon:"🚲",body:"レース前半、選手たちの先頭を走るペースメーカー。選手は誘導員より前に出てはいけないルール。残り2周ほどで走路の外へ退避し、そこから本当の勝負が始まる。"},
+  {id:"jan",t:"ジャン（打鐘）",icon:"🔔",body:"残り1周半の地点で打ち鳴らされる鐘。「仕掛けどころ」を知らせる合図で、ここからレースが一気に動き出す。競輪場ごとに鐘の音色が違うのも名物。"},
+  {id:"line",t:"ライン",icon:"🤝",body:"同じ地区の選手が前後一列に組む即席チーム。先頭の自力型が風を受けて引っ張り、後ろの選手は守ってもらいながら脚を溜める。ただし最後の直線では仲間でも容赦なく勝負する、競輪独特の文化。"},
+  {id:"bante",t:"番手",icon:"✌️",body:"ラインの先頭のすぐ後ろの位置。風よけの恩恵を最大限に受けられる特等席で、脚を溜めて最後に差し切るチャンスが最も大きい。番手を巡る駆け引きは競輪の華。"},
+  {id:"kyakushitsu",t:"脚質",icon:"💪",body:"選手の戦い方のタイプ。先頭を駆ける「逃げ」、中団から一気に行く「捲り」、最後の直線で抜く「差し」が代表的。"},
+  {id:"draft",t:"風よけ",icon:"🌬",body:"前の選手の真後ろにつくと空気抵抗が大きく減り、スタミナ消費を3〜5割も節約できる現象。時速60〜70kmで走る競輪ではこれがすべてといっても過言ではない。"},
+  {id:"kyuhan",t:"級班制度",icon:"🏅",body:"選手はデビュー後A級3班からスタートし、成績によってA級2班→A級1班→S級2班→S級1班と昇格していく。頂点はわずか9名だけの「S級S班」。"},
+  {id:"pts",t:"競走得点",icon:"📈",body:"レースの着順に応じてもらえる得点。グレードの高いレースほど高得点。この平均点が昇格・降格や、ビッグレースへの出場資格を決める「選手の通信簿」だ。"},
+  {id:"car",t:"車番と色",icon:"🎨",body:"1白・2黒・3赤・4青・5黄・6緑・7橙・8桃・9紫。全国どの競輪場でも共通のユニフォーム色で、観客はこの色を頼りに高速の展開を追いかける。"},
+  {id:"bank",t:"バンク",icon:"🏟",body:"競輪場のすり鉢状に傾いた専用走路。1周333m・400m・500mなどの種類があり、カーブの傾斜（カント）は最大30度以上。"},
+  {id:"gp",t:"グランプリ",icon:"👑",body:"毎年末に行われる賞金王決定戦「KEIRINグランプリ」。その年の選ばれし9人だけが出場できる一発勝負。優勝賞金は1億円を超える。"},
+];
+
+// ─── チュートリアル ──────────────────────────────────────────
+const TUT_STEPS={
+  start:{t:"競輪レース、スタート！",body:"9人でバンク5周・約2000m。号砲で一斉にスタートしたら、まずは誘導員のペースで周回。同じ地区の仲間と「ライン」を組んで隊列を作ります。",unlock:["keirin","pacer"]},
+  position:{t:"風よけが超重要！",body:"前の選手の真後ろにつくと空気抵抗が減り、スタミナ消費を大きく節約できます（風よけ）。▲▼ボタンで隊列の位置を調整してみよう。",unlock:["draft","bante"]},
+  pacerOut:{t:"誘導員 退避！",body:"残り2周で誘導員がコースを外れました。ここからペースが一気に上がります。各ラインの先頭が仕掛けどころを探る、緊張の時間です。",unlock:[]},
+  jan:{t:"ジャン！（打鐘）",body:"残り1周半を知らせる鐘＝ジャンが鳴りました！「逃げ」の選手はここから仕掛けます。スパートボタンも解禁。押すタイミングが勝負の分かれ目！",unlock:["jan"]},
+  spurt:{t:"スパート！！",body:"ここからは連打でペダルを踏み込め！選手があなたの連打に合わせてもがきます。ただしスタミナ切れ（タレ）に注意！",unlock:[]},
+};
+
+// ─── 名前・地区 ─────────────────────────────────────────────
+const SURNAMES=["佐藤","鈴木","高橋","田中","伊藤","渡辺","山本","中村","小林","加藤","吉田","山田","松本","井上","木村","清水","山口","森田","池田","橋本","阿部","石川","山崎","中島","前田","藤田","後藤","岡田","長谷川","村上","近藤","坂本","遠藤","青木","西村","福田","太田","三浦","岡本","松田"];
+const GIVENS=["翔太","健太","大輔","拓也","直樹","亮","誠","剛","学","浩二","雅人","俊介","竜也","光","海斗","蓮","大地","勇人","慎吾","哲也","一馬","隼人","和真","昇","武","啓太","良平","達也","純","克己"];
+const REGIONS=["北日本","関東","南関東","中部","近畿","中国","四国","九州"];
+const REGION_COLORS={"北日本":"#62b6ff","関東":"#ff8a65","南関東":"#ffd54f","中部":"#81c784","近畿":"#ba93f5","中国":"#4dd0e1","四国":"#f48fb1","九州":"#ff7043"};
+
+// ─── 上がりタイム（ラスト200m）の算出 ──────────────────────────
+function computeAgari(tele,stats){
+  const draftPct=tele.runSec>1?clamp(tele.draftSec/tele.runSec,0,1):0;
+  const mash=tele.mashTicks>0?clamp(tele.mashSum/tele.mashTicks,0,1):0.4;
+  const ideal=300;
+  const timing=tele.spurtRem!=null?clamp(1-Math.abs(tele.spurtRem-ideal)/300,0,1):0.4;
+  const statContrib=(stats.spd-50)/120*1.15+(stats.pow-50)/120*0.75+(stats.sta-50)/120*0.55+(stats.tec-50)/120*0.35;
+  const playContrib=draftPct*0.5+timing*0.6+mash*0.8;
+  let agari=8.9-statContrib-playContrib;
+  if(tele.tired)agari+=0.7;
+  return{time:Math.max(6.5,Math.round(agari*100)/100),draftPct,mash,timing};
+}
+function rankInList(entries,best){if(best==null)return null;let r=1;for(const e of entries)if(e.time<best)r++;return r;}
+function versusAgari(timingScore,mashScore){return Math.max(6.5,Math.round((8.6-timingScore*1.0-mashScore*1.1)*100)/100);}
+function buildBoard(entries,myUid,myCareer){
+  const map={};
+  for(const e of entries){if(e.key&&e.key.indexOf(myUid)>=0)continue;map[e.key||e.name+e.time]=e;}
+  const list=Object.values(map).map(e=>({name:e.name,region:e.region,time:e.time,rank:e.rank,isP:false}));
+  if(myCareer&&myCareer.bestAgari!=null)list.push({name:myCareer.name,region:myCareer.region,time:myCareer.bestAgari,rank:myCareer.rank,isP:true});
+  list.sort((a,b)=>a.time-b.time);
+  return list;
+}
+
+const INTRO_SLIDES=[
+  {icon:"🚴",t:"競輪ってなんだ？",b:"9人の選手が自転車でバンク（専用走路）を5周・約2000m走り、着順を競うプロスポーツ。時速70km近い世界だ。"},
+  {icon:"🤝",t:"ただ速いだけじゃ勝てない",b:"前の選手の真後ろは空気抵抗が減る「風よけ」ポジション。仲間で「ライン」を組み、前が風を受け、後ろが脚を溜める駆け引きが勝負を分ける。"},
+  {icon:"🔔",t:"仕掛けどころ",b:"残り1周半で鳴る鐘＝「ジャン」からレースが一気に動く。どこで踏み出すか、タイミングがすべてだ。"},
+  {icon:"🔥",t:"目指すは頂点・SS班",b:"A級3班からスタートし、勝って得点を稼げば昇格。たった9人の「S級S班」、そしてグランプリの頂へ。さあ、漢の中の漢道を駆け上がれ！"},
+];
+
+// ─── ユーティリティ ──────────────────────────────────────────
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const irnd=(a,b)=>Math.floor(rnd(a,b+1));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function conditionInfo(f){
+  if(f<=25) return{label:"絶好調",mult:1.05,color:"#ffd34d",icon:"🔥"};
+  if(f<=45) return{label:"好調",mult:1.02,color:"#7ee08a",icon:"😊"};
+  if(f<=70) return{label:"普通",mult:1.0,color:"#9fb0d0",icon:"😐"};
+  if(f<=85) return{label:"不調",mult:0.96,color:"#f0a05a",icon:"😟"};
+  return{label:"絶不調",mult:0.91,color:"#f06a6a",icon:"🥵"};
+}
+function starsOf(stats){return clamp(Math.round((stats.pow+stats.spd+stats.sta+stats.tec-150)/45),1,5);}
+
+// ─── セーブ ──────────────────────────────────────────────────
+const SAVE_KEY="keirin-ss-v3";
+async function saveGame(c){try{if(window.storage)await window.storage.set(SAVE_KEY,JSON.stringify(c));}catch(e){}}
+async function loadGame(){try{if(window.storage){const r=await window.storage.get(SAVE_KEY);if(r?.value)return JSON.parse(r.value);}}catch(e){}return null;}
+async function deleteSave(){try{if(window.storage)await window.storage.delete(SAVE_KEY);}catch(e){}}
+
+// ─── 全国ランキング ──────────────────────────────────────────
+const LB_PREFIX="lbrank:";
+function uidOf(c){return c&&c.uid?c.uid:"anon";}
+async function submitRanking(c){
+  try{
+    if(!window.storage||c.bestAgari==null)return;
+    await window.storage.set(LB_PREFIX+uidOf(c),JSON.stringify({name:c.name,region:c.region,time:c.bestAgari,rank:c.rank,at:Date.now()}),true);
+  }catch(e){}
+}
+async function loadRanking(){
+  const out=[];
+  try{
+    if(!window.storage)return out;
+    const r=await window.storage.list(LB_PREFIX,true);
+    const keys=r&&r.keys?r.keys:[];
+    for(const k of keys){
+      try{const v=await window.storage.get(k,true);if(v&&v.value){const e=JSON.parse(v.value);if(e&&typeof e.time==="number")out.push({...e,key:k});}}catch(e){}
+    }
+  }catch(e){}
+  return out;
+}
+
+// ─── オンライン対戦プール ────────────────────────────────────
+const VS_PREFIX="vspool:";
+async function submitVsRun(c,time){
+  try{
+    if(!window.storage)return;
+    await window.storage.set(VS_PREFIX+uidOf(c),JSON.stringify({name:c.name,region:c.region,rank:c.rank,style:c.style,stats:c.stats,time,at:Date.now()}),true);
+  }catch(e){}
+}
+async function loadVsPool(myUid){
+  const out=[];
+  try{
+    if(!window.storage)return out;
+    const r=await window.storage.list(VS_PREFIX,true);
+    const keys=r&&r.keys?r.keys:[];
+    for(const k of keys){
+      if(myUid&&k.indexOf(myUid)>=0)continue;
+      try{const v=await window.storage.get(k,true);if(v&&v.value){const e=JSON.parse(v.value);if(e&&typeof e.time==="number")out.push({...e,key:k});}}catch(e){}
+    }
+  }catch(e){}
+  return out;
+}
+
+// ─── サウンド ────────────────────────────────────────────────
+let _actx=null;
+function getACtx(){return _actx=_actx||new(window.AudioContext||window.webkitAudioContext)();}
+function resumeAudio(){try{const a=getACtx();if(a.state==="suspended"&&a.resume)a.resume();}catch(e){}}
+function beep(freq,dur,vol,type){
+  try{const a=getACtx(),o=a.createOscillator(),g=a.createGain();o.type=type||"square";o.frequency.value=freq;g.gain.value=vol||0.06;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+dur);o.stop(a.currentTime+dur);}catch(e){}
+}
+function clickSound(){try{const a=getACtx(),o=a.createOscillator(),g=a.createGain();o.type="square";o.frequency.setValueAtTime(1040,a.currentTime);o.frequency.exponentialRampToValueAtTime(1560,a.currentTime+0.018);g.gain.setValueAtTime(0.05,a.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+0.05);o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+0.06);}catch(e){}}
+function bellSound(){beep(1318,0.35,0.07,"triangle");setTimeout(()=>beep(1318,0.45,0.07,"triangle"),200);setTimeout(()=>beep(1318,0.5,0.06,"triangle"),420);}
+function spurtSound(){beep(520,0.09,0.07);setTimeout(()=>beep(780,0.09,0.07),90);setTimeout(()=>beep(1100,0.16,0.08),180);}
+
+// ─── BGMエンジン ─────────────────────────────────────────────
+const NF={
+  E2:82.41,G2:98.00,A2:110.00,B2:123.47,C3:130.81,D3:146.83,
+  E3:164.81,G3:196.00,A3:220.00,B3:246.94,
+  C4:261.63,D4:293.66,E4:329.63,FS4:369.99,G4:392.00,A4:440.00,B4:493.88,
+  C5:523.25,D5:587.33,E5:659.25,FS5:739.99,G5:783.99,A5:880.00,B5:987.77,
+};
+const PATTERNS={
+  race:{bpm:148,steps:[
+    {k:0.65,hh:0.15,b:NF.E2,lead:NF.E5},{hh:0.10,lead:NF.D5},
+    {sn:0.40,hh:0.15,b:NF.G2,lead:NF.B4},{hh:0.10},
+    {k:0.55,hh:0.15,b:NF.A2,lead:NF.A4},{hh:0.10,lead:NF.G4},
+    {sn:0.40,hh:0.15,b:NF.B2,lead:NF.G5},{hh:0.10,lead:NF.E5},
+    {k:0.65,hh:0.15,b:NF.E2,lead:NF.E5},{hh:0.10,lead:NF.G5},
+    {sn:0.40,hh:0.15,b:NF.D3,lead:NF.A5},{hh:0.10,lead:NF.G5},
+    {k:0.55,hh:0.15,b:NF.A2,lead:NF.E5},{hh:0.10,lead:NF.D5},
+    {sn:0.40,hh:0.15,b:NF.E2,lead:NF.B4},{hh:0.10,lead:NF.G4},
+  ]},
+  victory:{bpm:168,steps:[
+    {k:0.7,hh:0.2,b:NF.E2,lead:NF.G5},{hh:0.1,lead:NF.A5},
+    {k:0.5,sn:0.35,hh:0.2,lead:NF.B5},{hh:0.1},
+    {k:0.6,hh:0.2,b:NF.A2,lead:NF.E5},{sn:0.35,hh:0.1,lead:NF.G5},
+    {k:0.5,hh:0.2,lead:NF.A5},{hh:0.1,lead:NF.G5},
+    {k:0.7,hh:0.2,b:NF.E2,lead:NF.E5},{hh:0.1,lead:NF.G5},
+    {sn:0.45,hh:0.2,b:NF.B2,lead:NF.A5},{hh:0.1,lead:NF.B5},
+    {k:0.6,hh:0.2,b:NF.A2,lead:NF.G5},{sn:0.35,hh:0.1,lead:NF.E5},
+    {k:0.5,hh:0.2,b:NF.E2,lead:NF.B5},{hh:0.1},
+  ]},
+  theme:{bpm:132,steps:[
+    {k:0.6,hh:0.13,b:NF.E2,lead:NF.E5},{hh:0.08,lead:NF.G5},
+    {sn:0.34,hh:0.13,lead:NF.B4},{hh:0.08,lead:NF.E5},
+    {k:0.5,hh:0.13,b:NF.C3,lead:NF.C5},{hh:0.08,lead:NF.D5},
+    {sn:0.34,hh:0.13,lead:NF.E5},{hh:0.08,lead:NF.G4},
+    {k:0.6,hh:0.13,b:NF.G2,lead:NF.D5},{hh:0.08,lead:NF.B4},
+    {sn:0.34,hh:0.13,lead:NF.G4},{hh:0.08,lead:NF.B4},
+    {k:0.5,hh:0.13,b:NF.D3,lead:NF.A4},{hh:0.08,lead:NF.D5},
+    {sn:0.34,hh:0.13,lead:NF.FS4},{hh:0.08,lead:NF.A4},
+  ]},
+};
+
+class BGM{
+  constructor(){this.ctx=null;this.master=null;this.mode=null;this.step=0;this.nextT=0;this.tid=null;this.muted=false;}
+  init(){if(!this.ctx){const a=getACtx();this.ctx=a;this.master=a.createGain();this.master.gain.value=0.32;this.master.connect(a.destination);}}
+  setMute(v){this.muted=v;if(this.master)this.master.gain.value=v?0:0.32;}
+  start(mode){
+    this.init();
+    if(this.mode===mode)return;
+    this.stop();
+    this.mode=mode;this.step=0;this.nextT=this.ctx.currentTime+0.05;
+    this._sched();
+  }
+  stop(){if(this.tid)clearTimeout(this.tid);this.tid=null;this.mode=null;}
+  _note(freq,type,t,dur,vol){
+    try{const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+dur+0.01);}catch(e){}
+  }
+  _kick(t,vol){
+    try{const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(0.001,t+0.35);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);o.connect(g);g.connect(this.master);o.start(t);o.stop(t+0.4);}catch(e){}
+  }
+  _snare(t,vol){
+    try{const b=this.ctx.createBuffer(1,Math.floor(this.ctx.sampleRate*0.12),this.ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const s=this.ctx.createBufferSource();s.buffer=b;const f=this.ctx.createBiquadFilter();f.type="bandpass";f.frequency.value=1600;f.Q.value=0.9;const g=this.ctx.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.16);s.connect(f);f.connect(g);g.connect(this.master);s.start(t);}catch(e){}
+  }
+  _hihat(t,vol){
+    try{const b=this.ctx.createBuffer(1,Math.floor(this.ctx.sampleRate*0.035),this.ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const s=this.ctx.createBufferSource();s.buffer=b;const f=this.ctx.createBiquadFilter();f.type="highpass";f.frequency.value=8000;const g=this.ctx.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.04);s.connect(f);f.connect(g);g.connect(this.master);s.start(t);}catch(e){}
+  }
+  _sched(){
+    if(!this.mode)return;
+    const pat=PATTERNS[this.mode];if(!pat)return;
+    const spb=(60/pat.bpm)/2;
+    while(this.nextT<this.ctx.currentTime+0.14){
+      const s=pat.steps[this.step%pat.steps.length];
+      const t=this.nextT;
+      if(s.k)this._kick(t,s.k);
+      if(s.sn)this._snare(t,s.sn);
+      if(s.hh)this._hihat(t,s.hh);
+      if(s.b)this._note(s.b,"sawtooth",t,spb*0.8,0.16);
+      if(s.lead)this._note(s.lead,"square",t,spb*0.65,0.10);
+      this.nextT+=spb;this.step++;
+    }
+    this.tid=setTimeout(()=>this._sched(),40);
+  }
+}
+const bgm=new BGM();
+
+// ─── シミュレーション ────────────────────────────────────────
+const TRACK=(()=>{const R=30,L=105.75,C=Math.PI*R,P=2*L+2*C;return{R,L,C,P};})();
+const LAPS=5,TOTAL=TRACK.P*LAPS;
+
+function trackPoint(dist,lane){
+  const{R,L,C,P}=TRACK;
+  let d=((dist%P)+P)%P;const off=lane*2.4;
+  if(d<L)return{x:L/2-d,y:R+off};d-=L;
+  if(d<C){const a=Math.PI/2+(d/C)*Math.PI;return{x:-L/2+Math.cos(a)*(R+off),y:Math.sin(a)*(R+off)};}
+  d-=C;if(d<L)return{x:-L/2+d,y:-(R+off)};d-=L;
+  const a=-Math.PI/2+(d/C)*Math.PI;return{x:L/2+Math.cos(a)*(R+off),y:Math.sin(a)*(R+off)};
+}
+function deriveBody(stats){return{maxV:13.6+stats.spd*0.052,acc:0.9+stats.pow*0.02,staMax:55+stats.sta*1.5,draftMult:Math.max(0.3,0.55-stats.tec*0.0022)};}
+
+function pushCom(sim,text,force){if(force||sim.t-(sim.lastComT||-9)>1.0){sim.events.push({type:"comment",text});sim.lastComT=sim.t;}}
+
+function createSim(ctx,career,strategy,tutorial){
+  const condP=conditionInfo(career.fatigue);
+  const slotted=[];
+  ctx.lines.forEach((ln,li)=>{
+    let cars=ln.cars.slice();
+    if(ln.isPlayerLine&&strategy.slot>=0){const pc=ctx.riders.find(r=>r.isP).car;cars.splice(strategy.slot,0,pc);}
+    cars.forEach((c,si)=>{slotted.push({car:c,slot:si,lineIdx:li,aheadCar:si>0?cars[si-1]:null});});
+  });
+  let prefCtr=1;const prefBC={};slotted.forEach(s=>{prefBC[s.car]=prefCtr++;});
+  const riders=ctx.riders.map((r,i)=>{
+    const body=deriveBody(r.stats);
+    const sl=slotted.find(s=>s.car===r.car)||{slot:0,aheadCar:null};
+    let pref,spurtAt,cond,role,aheadCar;
+    if(r.isP){cond=condP.mult;spurtAt=0;role="player";aheadCar=null;pref=prefBC[r.car]||strategy.pref;}
+    else{cond=rnd(0.96,1.04);aheadCar=sl.aheadCar;role=sl.slot===0?"leader":"follower";pref=prefBC[r.car]||i+1;
+      if(r.styleId==="nige")spurtAt=rnd(560,700);else if(r.styleId==="makuri")spurtAt=rnd(360,480);else spurtAt=rnd(230,320);
+      if(role==="follower")spurtAt=rnd(170,230);}
+    return{...r,...body,cond,pref,spurtAt,role,slot:sl.slot,aheadCar,sur:r.name.split(" ")[0]||r.name,
+      d:2-Math.floor(i/3)*2.4,v:0,lane:0.4+(i%3)*1.1,tLane:0.4,
+      sta:body.staMax,state:"pack",tired:false,draft:false,
+      crankPhase:rnd(0,Math.PI*2),
+      fin:false,finT:0,place:0,idx:i+1,tareCalled:false,sashiGo:false};
+  });
+  return{total:TOTAL,t:0,paused:false,done:false,
+    pacer:{d:12,v:7.5,active:true},riders,
+    playerThrottle:0,intent:"keep",
+    shake:0,cam:{zoom:1,focusX:0},
+    events:tutorial?[{type:"tut",step:"start"}]:[],
+    flags:{},finCount:0,results:null,tutorial,
+    tele:{draftSec:0,runSec:0,spurtRem:null,tired:false,mashSum:0,mashTicks:0},lastComT:-9,venue:ctx.venue};
+}
+
+function calcTS(sim){
+  if(sim.done)return 1;
+  const p=sim.riders.find(r=>r.isP);const rem=sim.total-p.d;
+  if(p.state==="spurt")return 1.45;if(rem>1300)return 4.2;if(rem>820)return 2.6;if(rem>600)return 1.9;return 1.5;
+}
+
+function stepSim(sim,h){
+  if(sim.paused||sim.done)return;
+  sim.t+=h;
+  const pc=sim.pacer,rs=sim.riders;
+  const byCar={};rs.forEach(r=>{byCar[r.car]=r;});
+  const player=rs.find(r=>r.isP);
+
+  if(!sim.flags.gun&&sim.t>0.25){sim.flags.gun=true;pushCom(sim,"号砲！9車が一斉にスタート！！",true);sim.events.push({type:"banner",text:"スタート！！",sub:"まずは誘導員の後ろで隊列を作れ"});}
+  if(!sim.flags.formation&&sim.t>11){sim.flags.formation=true;const lead=rs.slice().sort((a,b)=>b.d-a.d)[0];pushCom(sim,lead.region+"勢が前受けの構え",true);}
+
+  if(pc.active){
+    pc.v=clamp(7.5+(pc.d/sim.total)*18,7.5,12.9);pc.d+=pc.v*h;
+    const leadD=Math.max(...rs.map(r=>r.d));
+    if(sim.total-leadD<=805&&!sim.flags.pcOut){
+      sim.flags.pcOut=true;pc.active=false;
+      sim.events.push({type:"banner",text:"誘導員 退避！",sub:"ここから本当の勝負"});
+      sim.events.push({type:"phase",v:"ready"});
+      pushCom(sim,"誘導員が退避！ペースが上がる！",true);
+      if(sim.tutorial)sim.events.push({type:"tut",step:"pacerOut"});
+    }
+  }
+
+  const sorted=rs.slice().sort((a,b)=>b.d-a.d);sorted.forEach((r,i)=>{r.idx=i+1;});
+  if(sim.flags.pcOut&&!sim.done){const lc=sorted[0].car;if(sim.leadCar!==undefined&&sim.leadCar!==lc&&sim.t-(sim.leadT||-9)>2.5&&!sorted[0].fin){pushCom(sim,lc+"番 "+sorted[0].sur+"が先頭に立った！");sim.leadT=sim.t;}sim.leadCar=lc;}
+
+  const remP=sim.total-player.d;
+  if(sim.tutorial&&!sim.flags.tutPos&&sim.t>9&&pc.active){sim.flags.tutPos=true;sim.events.push({type:"tut",step:"position"});}
+  if(!sim.flags.bell&&remP<=600){sim.flags.bell=true;sim.events.push({type:"banner",text:"🔔 ジャン！！",sub:"残り1周半：仕掛けどころ"});sim.events.push({type:"bell"});pushCom(sim,"ジャンが鳴った！残り1周半！",true);if(sim.tutorial)sim.events.push({type:"tut",step:"jan"});}
+  if(!sim.flags.final&&remP<=200){sim.flags.final=true;sim.events.push({type:"banner",text:"最終直線！！",sub:"踏め踏め踏め——！！"});const tops=sorted.filter(r=>!r.fin).slice(0,2).map(r=>r.car+"番").join("と");pushCom(sim,"最終直線！"+tops+"の死闘！！",true);}
+  if(!sim.flags.autoSpurt&&remP<=260&&player.state==="pack"){sim.flags.autoSpurt=true;player.state="spurt";sim.tele.spurtRem=remP;sim.events.push({type:"phase",v:"spurt"});sim.events.push({type:"banner",text:"行くしかない！",sub:"連打でペダルを踏み込め！"});}
+
+  if(!player.fin){sim.tele.runSec+=h;if(player.draft)sim.tele.draftSec+=h;if(player.tired)sim.tele.tired=true;if(player.state==="spurt"){sim.tele.mashSum+=sim.playerThrottle;sim.tele.mashTicks++;}}
+
+  for(const r of rs){
+    r.crankPhase=(r.crankPhase+r.v*0.72*h)%(Math.PI*2);
+    if(r.fin){r.v=Math.max(7,r.v-1.6*h);r.d+=r.v*h;continue;}
+    const rem=sim.total-r.d;
+    let ahead=null,bestGap=1e9;
+    for(const o of rs){if(o!==r&&o.d>r.d){const g=o.d-r.d;if(g<bestGap){bestGap=g;ahead=o;}}}
+    let aheadObj=ahead;
+    if(pc.active&&(!ahead||pc.d-r.d<bestGap))aheadObj={v:pc.v,d:pc.d,lane:0.3};
+    const gap=aheadObj?aheadObj.d-r.d:1e9;
+    const laneDiff=aheadObj?Math.abs((aheadObj.lane||0.3)-r.lane):9;
+    r.draft=!!(aheadObj&&gap>1.2&&gap<12&&laneDiff<0.95);
+    const la=!r.isP&&r.aheadCar?byCar[r.aheadCar]:null;
+    let lineFollow=false,lgap=0;
+    if(la&&!la.fin&&r.state!=="spurt"){
+      lgap=la.d-r.d;
+      if(lgap>-2&&lgap<20){
+        lineFollow=true;
+        if(la.state==="spurt"||la.state==="follow"){if(r.state==="pack"){r.state="follow";if(r.slot===1)pushCom(sim,r.car+"番 "+r.sur+"が番手から続く！");}}
+        if(r.state==="follow"&&rem<=(r.slot>=2?150:190)){r.state="spurt";r.sashiGo=true;r.tLane=la.lane+1.15;pushCom(sim,r.car+"番 "+r.sur+"、外から差しに出た！！",true);}
+        if(r.state==="follow"&&la.tired&&rem<500){r.state="spurt";r.sashiGo=true;pushCom(sim,"前がいっぱい！"+r.car+"番 "+r.sur+"が出る！");}
+      }else{r.aheadCar=null;}
+    }
+    if(!r.isP&&(r.state==="pack"||r.role==="leader")&&!pc.active&&rem<=r.spurtAt&&!lineFollow){r.state="spurt";pushCom(sim,r.car+"番 "+r.sur+"（"+STYLES[r.styleId].label+"）が仕掛けた！！",true);}
+    let tv;const condV=r.maxV*r.cond;
+    if(r.state==="spurt"){tv=r.isP?12.8+sim.playerThrottle*(condV-12.8):condV;}
+    else if(r.state==="follow"&&la){tv=la.v+clamp((lgap-1.8)*1.3,-3,4);}
+    else if(!r.isP&&lineFollow){tv=la.v+clamp((lgap-2)*1.2,-2.5,1.8);}
+    else if(pc.active){
+      let pi=r.pref;if(r.isP){if(sim.intent==="up")pi=Math.max(1,r.idx-1);else if(sim.intent==="down")pi=Math.min(9,r.idx+1);else pi=r.idx;}
+      if(r.idx>pi)tv=(aheadObj?aheadObj.v:pc.v)+0.9;else if(r.idx<pi)tv=(aheadObj?aheadObj.v:11)-0.5;else tv=aheadObj?aheadObj.v+clamp((gap-2)*0.8,-1.2,1.2):pc.v;
+    }else{
+      if(r.isP){if(sim.intent==="up")tv=(aheadObj?aheadObj.v:13.4)+0.9;else if(sim.intent==="down")tv=(aheadObj?aheadObj.v:12)-0.6;else tv=aheadObj?aheadObj.v+clamp((gap-2)*0.8,-1,1.4):13.4;}
+      else tv=ahead?ahead.v+clamp((gap-2)*0.8,-1,1.4):13.5;
+    }
+    if(r.tired)tv=Math.min(tv,12.6);
+    if(aheadObj&&gap<3.4&&laneDiff<0.75&&tv>aheadObj.v+0.1){tv=Math.min(tv,aheadObj.v+0.05);r.tLane=(aheadObj.lane||0.3)+1.25;}
+    else if((r.state==="follow"||(lineFollow&&r.state==="pack"))&&la){r.tLane=la.lane;}
+    else if(!r.sashiGo){r.tLane=Math.max(0.35,r.tLane-0.5*h);}
+    r.lane+=clamp(r.tLane-r.lane,-1.6*h,1.6*h);r.lane=clamp(r.lane,0.2,4.0);
+    const accel=sim.t<6?r.acc+1.4:r.acc;r.v+=clamp(tv-r.v,-2.2*h,accel*h);r.v=Math.max(0,r.v);
+    if(r.v>13){const drain=Math.pow(r.v-13,1.45)*0.5*(r.draft?r.draftMult:1)*h;r.sta-=drain;
+      if(r.sta<=0){r.sta=0;if(!r.tired){r.tired=true;if(r.isP){sim.events.push({type:"banner",text:"タレた…！！",sub:"スタミナ切れで失速"});sim.shake=7;}else if(!r.tareCalled){r.tareCalled=true;pushCom(sim,r.car+"番 "+r.sur+"、一杯か！？苦しい！");}}}
+    }else if(r.sta<r.staMax&&r.v<12.6){r.sta=Math.min(r.staMax,r.sta+(r.tired?0.9:2.2)*h);if(r.tired&&r.sta>r.staMax*0.25)r.tired=false;}
+    if(pc.active&&r.d>pc.d-1.6){r.d=pc.d-1.6;r.v=Math.min(r.v,pc.v);}
+    r.d+=r.v*h;
+    if(r.d>=sim.total&&!r.fin){r.fin=true;sim.finCount++;r.place=sim.finCount;r.finT=sim.t-(r.d-sim.total)/Math.max(r.v,0.1);if(sim.finCount===1)pushCom(sim,"1着は"+r.car+"番 "+r.name+"！！",true);if(r.isP){sim.events.push({type:"banner",text:"ゴール！！",sub:r.place+"着でフィニッシュ"});sim.flags.playerFinT=sim.t;}}
+  }
+
+  const allFin=rs.every(r=>r.fin);const pDone=sim.flags.playerFinT!==undefined&&sim.t-sim.flags.playerFinT>3;
+  if((allFin||pDone||sim.t>280)&&!sim.done){
+    rs.forEach(r=>{if(!r.fin){r.fin=true;sim.finCount++;r.place=sim.finCount;r.finT=9999+(sim.total-r.d);}});
+    sim.done=true;sim.results=rs.slice().sort((a,b)=>a.place-b.place);sim.events.push({type:"phase",v:"done"});
+  }
+}
+
+// ─── レース描画 ──────────────────────────────────────────────
+function drawVelodromeBG(ctx, w, h, scrollX, spurtIntensity, venue) {
+  const sky = venue && venue.sky ? venue.sky : ["#080c18", "#0e1a2e"];
+  const crowdBase = venue && venue.crowd ? venue.crowd : "#2a3550";
+  const topH = h * 0.30;
+  const gd = ctx.createLinearGradient(0, 0, 0, topH);
+  gd.addColorStop(0, "#05070e"); gd.addColorStop(0.55, sky[0]); gd.addColorStop(1, sky[1]);
+  ctx.fillStyle = gd; ctx.fillRect(0, 0, w, topH);
+  const apexX = w / 2, apexY = topH * 0.04;
+  ctx.strokeStyle = "rgba(150,170,210,0.10)"; ctx.lineWidth = 1.4;
+  for (let r = 1; r <= 5; r++) {
+    const ry = topH * 0.18 + r * topH * 0.17, bow = topH * 0.12;
+    ctx.beginPath(); ctx.moveTo(-10, ry); ctx.quadraticCurveTo(apexX, ry - bow, w + 10, ry); ctx.stroke();
+  }
+  ctx.strokeStyle = "rgba(150,170,210,0.13)"; ctx.lineWidth = 1.1;
+  const ribs = 9;
+  for (let i = 0; i <= ribs; i++) {
+    const tx = (i / ribs) * w;
+    ctx.beginPath(); ctx.moveTo(apexX, apexY); ctx.quadraticCurveTo((apexX + tx) / 2, topH * 0.52, tx, topH * 0.95); ctx.stroke();
+  }
+  const lightCol = venue && venue.accent ? venue.accent : "#fff7d8";
+  for (let i = 0; i < 5; i++) {
+    const lx = w * (0.14 + i * 0.18), ly = topH * 0.34 + (i % 2) * topH * 0.16;
+    const lg = ctx.createRadialGradient(lx, ly, 0, lx, ly, 24);
+    lg.addColorStop(0, "rgba(255,250,225,0.5)"); lg.addColorStop(1, "rgba(255,250,225,0)");
+    ctx.fillStyle = lg; ctx.beginPath(); ctx.arc(lx, ly, 24, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#fff7d8"; ctx.beginPath(); ctx.arc(lx, ly, 3.5, 0, Math.PI * 2); ctx.fill();
+  }
+  const ag = ctx.createRadialGradient(apexX, apexY, 0, apexX, apexY, 46);
+  ag.addColorStop(0, "rgba(255,250,230,0.45)"); ag.addColorStop(1, "rgba(255,250,230,0)");
+  ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(apexX, apexY, 46, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = lightCol; ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.arc(apexX, apexY + 2, 3, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+  ctx.strokeStyle = "rgba(120,140,180,0.32)"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0, topH - 1); ctx.lineTo(w, topH - 1); ctx.stroke();
+
+  const standH = h * 0.22;
+  const crowdLight = venue && venue.accent ? venue.accent : "#4a5a8a";
+  for (let i = 0; i < 72; i++) {
+    const baseX = ((i * 19 + scrollX * 0.18) % (w + 38)) - 19;
+    const rowY = topH + (i % 4) * (standH / 4.5) + 4;
+    const col = (i % 13 === 0) ? crowdLight : (i % 3 === 0) ? crowdBase : "#2a3550";
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.arc(baseX + 9, rowY, 4.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillRect(baseX + 4, rowY + 4, 10, 10);
+  }
+
+  const fenceY = topH + standH;
+  ctx.fillStyle = "#1a2438"; ctx.fillRect(0, fenceY, w, 30);
+  for (let i = 0; i < 7; i++) {
+    const ax = ((i * 148 + scrollX * 0.55) % (w + 148)) - 74;
+    const ad = ADS[i % ADS.length];
+    ctx.fillStyle = ad.bg;
+    ctx.fillRect(ax, fenceY + 2, 136, 26);
+    ctx.strokeStyle = "rgba(255,255,255,0.22)"; ctx.lineWidth = 1;
+    ctx.strokeRect(ax + 0.5, fenceY + 2.5, 135, 25);
+    ctx.fillStyle = ad.fg;
+    ctx.font = "bold 10px sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(ad.text, ax + 68, fenceY + 15);
+  }
+
+  const trackY = fenceY + 30;
+  const g2 = ctx.createLinearGradient(0, trackY, 0, h);
+  g2.addColorStop(0, "#3c3228"); g2.addColorStop(0.4, "#2e261e"); g2.addColorStop(1, "#22190f");
+  ctx.fillStyle = g2; ctx.fillRect(0, trackY, w, h - trackY);
+  ctx.strokeStyle = "rgba(90,70,50,0.5)"; ctx.lineWidth = 1;
+  for (let i = 1; i < 7; i++) {
+    ctx.beginPath(); ctx.moveTo(0, trackY + (h - trackY) * i / 7); ctx.lineTo(w, trackY + (h - trackY) * i / 7); ctx.stroke();
+  }
+  ctx.strokeStyle = "rgba(29,111,224,0.7)"; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(0, trackY + 14); ctx.lineTo(w, trackY + 14); ctx.stroke();
+  ctx.strokeStyle = "rgba(226,58,46,0.6)"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0, trackY + 24); ctx.lineTo(w, trackY + 24); ctx.stroke();
+
+  if (spurtIntensity > 0.12) {
+    const si = clamp(spurtIntensity, 0, 1);
+    for (let k = 0; k < 18; k++) {
+      const lx = ((k * 45 + scrollX * 2.2) % (w + 90)) - 45;
+      const ly = trackY + 10 + (k % 5) * ((h - trackY) / 5);
+      const ll = (40 + (k % 3) * 28) * si;
+      ctx.strokeStyle = `rgba(255,255,180,${0.08 + si * 0.18})`;
+      ctx.lineWidth = (k % 3 + 1) * 0.8;
+      ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + ll, ly + (k%2?1:-1)); ctx.stroke();
+    }
+  }
+}
+
+function drawCyclist(ctx, cx, groundY, sc, jerseyColor, number, crankPhase, tired, spurt, isPlayer) {
+  ctx.save();
+  const s = sc;
+  const WR = 19 * s;
+  const rearX = cx - 23 * s, frontX = cx + 23 * s;
+  const axleY = groundY - WR;
+  const bbX = cx - 2 * s, bbY = axleY;
+
+  for (const wx of [rearX, frontX]) {
+    ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 2.5 * s;
+    ctx.beginPath(); ctx.arc(wx, axleY, WR, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = "#555"; ctx.lineWidth = 1.5 * s;
+    ctx.beginPath(); ctx.arc(wx, axleY, WR - 4 * s, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = "#888"; ctx.lineWidth = 0.7 * s;
+    for (let k = 0; k < 8; k++) {
+      const a = (k / 8) * Math.PI * 2 + crankPhase * 0.28;
+      ctx.beginPath(); ctx.moveTo(wx, axleY);
+      ctx.lineTo(wx + Math.cos(a) * (WR - 3 * s), axleY + Math.sin(a) * (WR - 3 * s)); ctx.stroke();
+    }
+  }
+
+  const seatX = bbX - 1 * s, seatY = bbY - 27 * s;
+  const htX = frontX - 7 * s, htY = axleY - 23 * s;
+  ctx.lineCap = "round"; ctx.lineWidth = 3 * s; ctx.strokeStyle = "#78788a";
+  const lines = [[bbX,bbY,htX,htY],[bbX,bbY,seatX,seatY],[seatX,seatY,htX,htY],[bbX,bbY,rearX,axleY],[seatX,seatY,rearX,axleY],[htX,htY,frontX,axleY]];
+  lines.forEach(([x1,y1,x2,y2])=>{ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();});
+  ctx.fillStyle = "#2a2a2a";
+  ctx.beginPath(); ctx.ellipse(seatX, seatY, 9*s, 3*s, -0.1, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = "#666"; ctx.lineWidth = 3*s;
+  ctx.beginPath(); ctx.moveTo(htX+1*s, htY-5*s); ctx.lineTo(htX+16*s, htY-5*s); ctx.stroke();
+  ctx.beginPath(); ctx.arc(htX+10*s, htY, 6*s, -Math.PI/2, Math.PI/2, true); ctx.stroke();
+
+  const crankR = 12 * s;
+  const rFX = bbX + Math.cos(crankPhase) * crankR, rFY = bbY + Math.sin(crankPhase) * crankR;
+  const lFX = bbX - Math.cos(crankPhase) * crankR, lFY = bbY - Math.sin(crankPhase) * crankR;
+  ctx.strokeStyle = "#999"; ctx.lineWidth = 3*s;
+  ctx.beginPath(); ctx.moveTo(bbX,bbY); ctx.lineTo(rFX,rFY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(bbX,bbY); ctx.lineTo(lFX,lFY); ctx.stroke();
+  ctx.lineWidth = 4*s; ctx.strokeStyle = "#555";
+  for (const [px,py] of [[rFX,rFY],[lFX,lFY]]) {
+    ctx.beginPath(); ctx.moveTo(px-5*s,py); ctx.lineTo(px+5*s,py); ctx.stroke();
+  }
+
+  const hipX = seatX + 2*s, hipY = seatY - 5*s;
+  const torsoEndX = hipX + 29*s, torsoEndY = hipY - 5*s;
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  ctx.strokeStyle = jerseyColor; ctx.lineWidth = 12*s;
+  ctx.beginPath(); ctx.moveTo(hipX,hipY); ctx.quadraticCurveTo(hipX+15*s,hipY-8*s,torsoEndX,torsoEndY); ctx.stroke();
+  ctx.strokeStyle = jerseyColor; ctx.lineWidth = 7*s;
+  ctx.beginPath(); ctx.moveTo(torsoEndX-2*s,torsoEndY-2*s); ctx.lineTo(htX+9*s,htY-4*s); ctx.stroke();
+
+  const bibW = 18*s, bibH = 14*s;
+  const bibX = hipX+11*s, bibY2 = hipY-8*s;
+  ctx.fillStyle = "rgba(255,255,255,0.94)"; ctx.fillRect(bibX-bibW/2,bibY2-bibH/2,bibW,bibH);
+  ctx.fillStyle = "#111"; ctx.font = `bold ${11*s}px sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(String(number), bibX, bibY2);
+
+  const drawLeg = (fx, fy, darker) => {
+    const thighL = 16*s, shinL = 16*s;
+    const dX = fx - hipX, dY = fy - hipY;
+    const d = Math.sqrt(dX*dX+dY*dY);
+    let kx, ky;
+    if (d < thighL + shinL && d > 0.1) {
+      const mid = {x:(hipX+fx)/2, y:(hipY+fy)/2};
+      const t2 = thighL*thighL, s2 = shinL*shinL, d2 = d*d;
+      const a = (t2-s2+d2)/(2*d), h2 = Math.sqrt(Math.max(0, t2-a*a));
+      const perpX = -dY/d, perpY = dX/d;
+      const off = Math.sin(crankPhase) < 0 ? -1 : 1;
+      kx = mid.x - (dX/d)*a + perpX*h2*Math.abs(off)*0.7;
+      ky = mid.y - (dY/d)*a + perpY*h2*Math.abs(off)*0.7;
+    } else { kx = (hipX+fx)/2; ky = (hipY+fy)/2 - 5*s; }
+    const col1 = darker ? "#8888aa" : jerseyColor;
+    const col2 = darker ? "#444464" : "#2a2a3a";
+    ctx.strokeStyle = col1; ctx.lineWidth = (darker?6:8)*s;
+    ctx.beginPath(); ctx.moveTo(hipX+(darker?-2*s:0),hipY+(darker?1*s:0)); ctx.lineTo(kx,ky); ctx.stroke();
+    ctx.strokeStyle = col2; ctx.lineWidth = (darker?5:7)*s;
+    ctx.beginPath(); ctx.moveTo(kx,ky); ctx.lineTo(fx,fy); ctx.stroke();
+  };
+  drawLeg(lFX, lFY, true);
+  drawLeg(rFX, rFY, false);
+
+  const helX = torsoEndX + 8*s, helY = torsoEndY - 8*s;
+  ctx.strokeStyle = "#d4a078"; ctx.lineWidth = 6*s;
+  ctx.beginPath(); ctx.moveTo(torsoEndX+2*s,torsoEndY-1*s); ctx.lineTo(helX-6*s,helY+6*s); ctx.stroke();
+  ctx.fillStyle = jerseyColor;
+  ctx.beginPath(); ctx.ellipse(helX, helY, 10*s, 8.5*s, -0.28, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = "rgba(160,220,255,0.38)";
+  ctx.beginPath(); ctx.ellipse(helX+5*s, helY+2*s, 7*s, 4.5*s, -0.2, 0, Math.PI*2); ctx.fill();
+
+  if (tired) { ctx.font = `${9*s}px sans-serif`; ctx.textAlign = "left"; ctx.fillText("💦", helX+11*s, helY-6*s); }
+  if (spurt) {
+    ctx.strokeStyle = "rgba(255,120,60,0.5)"; ctx.lineWidth = 3*s; ctx.setLineDash([4*s,3*s]);
+    ctx.beginPath(); ctx.ellipse(cx+3*s, groundY-44*s, 38*s, 28*s, 0, 0, Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  if (isPlayer) {
+    ctx.strokeStyle = "#FFD700"; ctx.lineWidth = 2.5*s; ctx.setLineDash([5*s,4*s]);
+    ctx.beginPath(); ctx.arc(cx+3*s, groundY-40*s, 42*s, 0, Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.restore();
+}
+
+function drawGoalLine(ctx, lx, yTop, yBot) {
+  const h = yBot - yTop, rows = 9, cw = 7;
+  for (let r = 0; r < rows; r++) {
+    const yy = yTop + h * r / rows, hh = h / rows + 0.5;
+    ctx.fillStyle = (r % 2 === 0) ? "#fff" : "#1a1a1a";
+    ctx.fillRect(lx - cw, yy, cw, hh);
+    ctx.fillStyle = (r % 2 === 0) ? "#1a1a1a" : "#fff";
+    ctx.fillRect(lx, yy, cw, hh);
+  }
+  ctx.fillStyle = "#cfd6e0";
+  ctx.fillRect(lx - cw - 2.5, yTop - 7, 2.5, h + 12);
+  ctx.fillRect(lx + cw, yTop - 7, 2.5, h + 12);
+}
+
+function drawMiniMap(ctx, sim, mx, my, mw, mh) {
+  ctx.save();
+  ctx.fillStyle = "rgba(8,12,22,0.82)";
+  if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(mx, my, mw, mh, 8); ctx.fill(); ctx.strokeStyle = "rgba(120,140,180,0.4)"; ctx.lineWidth = 1; ctx.stroke(); }
+  else { ctx.fillRect(mx, my, mw, mh); }
+  ctx.fillStyle = "rgba(180,200,230,0.55)"; ctx.font = "9px sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "top";
+  ctx.fillText("📹", mx + 6, my + 4);
+  const worldW = TRACK.L + TRACK.R * 2, worldH = TRACK.R * 2;
+  const padX = 10, padTop = 15, padBot = 7;
+  const s = Math.min((mw - padX * 2) / worldW, (mh - padTop - padBot) / worldH);
+  const ccx = mx + mw / 2, ccy = my + padTop + (mh - padTop - padBot) / 2;
+  const tp = (d, lane) => { const p = trackPoint(d, lane || 0); return { x: ccx + p.x * s, y: ccy + p.y * s }; };
+  ctx.strokeStyle = "rgba(150,170,210,0.5)"; ctx.lineWidth = Math.max(4, TRACK.R * s * 0.5); ctx.lineCap = "round";
+  ctx.beginPath();
+  for (let d = 0; d <= TRACK.P + 1; d += 6) { const p = tp(d, 0); if (d === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); }
+  ctx.closePath(); ctx.stroke();
+  const gi = tp(0, -0.7), go = tp(0, 0.7);
+  ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(gi.x, gi.y); ctx.lineTo(go.x, go.y); ctx.stroke();
+  if (sim.pacer.active) { const p = tp(sim.pacer.d, 0); ctx.fillStyle = "#aab4c8"; ctx.beginPath(); ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2); ctx.fill(); }
+  const order = sim.riders.slice().sort((a, b) => (a.isP ? 1 : 0) - (b.isP ? 1 : 0));
+  for (const r of order) {
+    const p = tp(r.d, 0);
+    ctx.fillStyle = r.fin ? "rgba(130,140,160,0.6)" : CAR_COLORS[r.car].bg;
+    ctx.beginPath(); ctx.arc(p.x, p.y, r.isP ? 3.3 : 2.4, 0, Math.PI * 2); ctx.fill();
+    if (r.isP) { ctx.strokeStyle = "#FFD700"; ctx.lineWidth = 1.5; ctx.stroke(); }
+    else { ctx.strokeStyle = "rgba(0,0,0,0.45)"; ctx.lineWidth = 0.6; ctx.stroke(); }
+  }
+  ctx.restore();
+}
+
+function drawRaceView(canvas, sim, dpr) {
+  if (!canvas || !sim) return;
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width / dpr, H = canvas.height / dpr;
+  ctx.save();
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (sim.shake > 0.2) ctx.translate(rnd(-sim.shake, sim.shake), rnd(-sim.shake, sim.shake));
+
+  const player = sim.riders.find(r => r.isP);
+  const remP = sim.total - player.d;
+  const spurtInt = player.state === "spurt" ? clamp(sim.playerThrottle * 0.7 + (player.v - 13) / 6, 0, 1) : 0;
+  const scrollX = player.d * 1.8 % (W + 200);
+  const HUDB = 52;
+  const drawH = H - HUDB;
+
+  drawVelodromeBG(ctx, W, drawH, scrollX, spurtInt, sim.venue);
+
+  const MPX = 9.5;
+  const CX = W * 0.42;
+  const groundY = drawH * 0.87;
+  const trackTopY = drawH * 0.52 + 30;
+  {
+    const nextLapD = Math.ceil((player.d + 0.5) / TRACK.P) * TRACK.P;
+    for (let k = 0; k < 2; k++) {
+      const lineD = nextLapD + k * TRACK.P;
+      if (lineD >= sim.total - 1) break;
+      const lx = CX + (lineD - player.d) * MPX;
+      if (lx > -10 && lx < W + 10) {
+        ctx.strokeStyle = "rgba(255,255,255,0.38)"; ctx.lineWidth = 2; ctx.setLineDash([7, 5]);
+        ctx.beginPath(); ctx.moveTo(lx, trackTopY); ctx.lineTo(lx, groundY + 8); ctx.stroke(); ctx.setLineDash([]);
+      }
+    }
+    const gx = CX + (sim.total - player.d) * MPX;
+    if (gx > -40 && gx < W + 40) {
+      drawGoalLine(ctx, gx, trackTopY, groundY + 10);
+      ctx.fillStyle = "#FFD700"; ctx.font = "bold 13px 'DotGothic16',sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+      ctx.fillText("🏁GOAL", gx, trackTopY - 5);
+    }
+  }
+
+  const drawOrder = sim.riders.slice().sort((a, b) => a.d - b.d);
+
+  if (sim.pacer.active) {
+    const px = CX + (sim.pacer.d - player.d) * MPX;
+    if (px > -60 && px < W + 60) {
+      ctx.fillStyle = "#9aa8c0"; ctx.font = "bold 11px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+      ctx.fillText("誘 PACER", px, groundY - 48);
+      ctx.fillStyle = "#9aa8c0";
+      ctx.beginPath(); ctx.arc(px, groundY - 25, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(px, groundY - 25, 12, 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+
+  for (const r of drawOrder) {
+    const rel = r.d - player.d;
+    const rx = CX + rel * MPX;
+    if (rx < -80 || rx > W + 80) continue;
+    const sc = r.isP ? 1.0 : clamp(1.0 + (rel > 0 ? -rel : rel) * 0.004, 0.65, 1.05);
+    const laneOffY = (r.lane - 1.5) * -4;
+    const ry = groundY + laneOffY;
+    const col = CAR_COLORS[r.car];
+    drawCyclist(ctx, rx, ry, sc, col.bg, r.car, r.crankPhase, r.tired, r.state === "spurt", r.isP);
+    if (!r.fin) {
+      ctx.fillStyle = col.bg; ctx.strokeStyle = r.car===2?"#666":"#111"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(rx, ry - 19*sc - 16, 9*sc, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = col.fg; ctx.font = `bold ${8*sc}px sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(String(r.car), rx, ry - 19*sc - 16);
+    }
+  }
+
+  if (spurtInt > 0.15) {
+    ctx.save();
+    for (let k = 0; k < 22; k++) {
+      const a = (k/22)*Math.PI*2 + Math.sin(sim.t*8+k)*0.05;
+      const cos = Math.cos(a), sin = Math.sin(a);
+      const ed = 200 + Math.sin(sim.t*15+k*4)*30;
+      ctx.strokeStyle = `rgba(255,248,160,${0.06+spurtInt*0.18})`;
+      ctx.lineWidth = 1 + k%3;
+      ctx.beginPath(); ctx.moveTo(CX + cos*ed, groundY/2 + sin*ed); ctx.lineTo(CX + cos*(ed+55), groundY/2 + sin*(ed+55)); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  drawMiniMap(ctx, sim, W - 128, 8, 120, 58);
+
+  ctx.fillStyle = "rgba(7,11,22,0.9)";
+  ctx.fillRect(0, drawH, W, HUDB);
+  ctx.strokeStyle = "#1e2d45"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0,drawH); ctx.lineTo(W,drawH); ctx.stroke();
+
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "left"; ctx.fillStyle = "#9fb0d0"; ctx.font = "10px sans-serif";
+  ctx.fillText("残り", 12, drawH+14);
+  ctx.fillStyle = "#fff"; ctx.font = "bold 20px sans-serif";
+  ctx.fillText(Math.max(0,Math.ceil(remP))+"m", 12, drawH+33);
+  ctx.fillStyle = "#5a6c98"; ctx.font = "9px sans-serif";
+  ctx.fillText("LAP "+Math.min(LAPS,Math.floor(player.d/TRACK.P)+1)+"/"+LAPS, 13, drawH+47);
+  ctx.textAlign = "center"; ctx.fillStyle = "#9fb0d0"; ctx.font = "10px sans-serif";
+  ctx.fillText("速度", W/2, drawH+14);
+  ctx.fillStyle = "#7ee0ff"; ctx.font = "bold 18px sans-serif";
+  ctx.fillText((player.v*3.6).toFixed(1)+" km/h", W/2, drawH+33);
+  ctx.textAlign = "right"; ctx.fillStyle = "#9fb0d0"; ctx.font = "10px sans-serif";
+  ctx.fillText(player.fin?"着順":"現在", W-12, drawH+14);
+  ctx.fillStyle = "#FFD700"; ctx.font = "bold 24px sans-serif";
+  ctx.fillText((player.fin?player.place:player.idx)+"位", W-12, drawH+35);
+
+  ctx.restore();
+}
+
+// ─── UI アトム ───────────────────────────────────────────────
+function StatBar({label,value,color}){
+  return(<div className="statrow"><span className="statlabel">{label}</span><div className="statbarbg"><div className="statbarfill" style={{width:clamp(value,0,120)/1.2+"%",background:color}}/></div><span className="statval">{value}</span></div>);
+}
+function CarChip({car,size}){const c=CAR_COLORS[car];const s=size||26;return(<span className="carchip" style={{background:c.bg,color:c.fg,width:s,height:s,fontSize:s*0.55,border:car===1?"1.5px solid #aaa":"1.5px solid #0b0e18"}}>{car}</span>);}
+function Senpai({mood,text,size}){
+  return(<div className="senpaibox"><div className={"senpaiface "+(size==="big"?"big":"")}>{SENPAI_MOOD[mood]||"🤨"}</div><div className="senpaibubble"><div className="senpainame">{SENPAI_NAME}<span className="senpaitag">兄貴</span></div><div className="senpaitext">{text}</div></div></div>);
+}
+function Reporter({text}){
+  return(<div className="reporterbox"><div className="reporterface">📺</div><div className="reporterbubble"><div className="reportername">記者</div><div className="reportertext">{text}</div></div></div>);
+}
+
+// ─── タイトル ─────────────────────────────────────────────────
+function TitleScreen({hasSave,onNew,onContinue}){
+  const[zoom,setZoom]=useState(false);
+  useEffect(()=>{bgm.start("theme");const t=setTimeout(()=>setZoom(true),80);return()=>clearTimeout(t);},[]);
+  return(
+    <div className="screen center titlescreen">
+      <div className="flamebg">{Array.from({length:28}).map((_,i)=>(
+        <span key={i} className="flame" style={{left:(i*3.6-1)+"%",animationDelay:(i%7)*0.17+"s",animationDuration:(1+(i%5)*0.22)+"s",width:(14+(i%4)*9)+"px",height:(55+(i%6)*34)+"px"}}/>
+      ))}<div className="flameglow"/></div>
+      <div className={"titlewrap "+(zoom?"zoomin":"zoomstart")}>
+        <div className="titletag">遊んで覚える競輪入門ゲーム</div>
+        <h1 className="gametitle flametitle">SSケイリン</h1>
+        <div className="titlesub flamesub">〜 目指せSS 漢の中の漢道 〜</div>
+        <div className="titledots">{[1,2,3,4,5,6,7,8,9].map(n=><span key={n} className="titledot" style={{background:CAR_COLORS[n].bg,animationDelay:n*0.12+"s"}}/>)}</div>
+        <div className="titlebtns">
+          {hasSave&&<button className="btn primary big" onClick={onContinue}>つづきから</button>}
+          <button className={"btn big "+(hasSave?"ghost":"primary")} onClick={onNew}>はじめから</button>
+        </div>
+        <div className="titlefoot">A級3班のルーキーから、S級S班・グランプリ制覇へ。<br/>レースを走りながら競輪のルールが身につく。</div>
+        <div style={{marginTop:14}}><button className="linkbtn" onClick={()=>bgm.setMute(!bgm.muted)}>{bgm.muted?"🔇 ミュート中（タップで解除）":"🎵 BGMあり（タップでミュート）"}</button></div>
+      </div>
+    </div>
+  );
+}
+
+// ─── イントロ ─────────────────────────────────────────────────
+function IntroScreen({onDone}){
+  const[i,setI]=useState(0);const s=INTRO_SLIDES[i];const last=i===INTRO_SLIDES.length-1;
+  return(
+    <div className="screen center intro">
+      <button className="skipbtn" onClick={onDone}>スキップ ▶▶</button>
+      <div className="introcard" key={i}><div className="introicon">{s.icon}</div><div className="introtitle">{s.t}</div><div className="introbody">{s.b}</div></div>
+      <div className="introdots">{INTRO_SLIDES.map((_,k)=><span key={k} className={"idot "+(k===i?"on":"")}/>)}</div>
+      <div className="introbtns">{last?<button className="btn primary big" onClick={onDone}>選手登録へ！</button>:<button className="btn primary big" onClick={()=>setI(i+1)}>次へ ▶</button>}</div>
+    </div>
+  );
+}
+
+// ─── 選手作成 ─────────────────────────────────────────────────
+function CreateScreen({onDone}){
+  const[name,setName]=useState("");const[style,setStyle]=useState("nige");const[region,setRegion]=useState(REGIONS[0]);
+  return(
+    <div className="screen pad">
+      <h2 className="h2">選手登録</h2>
+      <div className="card"><div className="fieldlabel">選手名</div><input className="textinput" value={name} maxLength={8} placeholder="例：速水 翔" onChange={e=>setName(e.target.value)}/></div>
+      <div className="fieldlabel" style={{margin:"14px 2px 6px"}}>所属地区 <span className="mini">（同じ地区の選手とラインを組む）</span></div>
+      <div className="regiongrid">{REGIONS.map(r=>(
+        <button key={r} className={"regionbtn "+(region===r?"sel":"")} style={region===r?{borderColor:REGION_COLORS[r],color:REGION_COLORS[r]}:{}} onClick={()=>setRegion(r)}>
+          <span className="regiondot" style={{background:REGION_COLORS[r]}}/>{r}
+        </button>
+      ))}</div>
+      <div className="fieldlabel" style={{margin:"16px 2px 6px"}}>脚質 <span className="mini">（練習で補強もできる）</span></div>
+      {Object.keys(STYLES).map(k=>(
+        <button key={k} className={"stylecard "+(style===k?"sel":"")} onClick={()=>setStyle(k)}>
+          <div className="stylehead"><span className="stylename">{STYLES[k].label}</span>{style===k&&<span className="selmark">✔ 選択中</span>}</div>
+          <div className="styledesc">{STYLES[k].desc}</div>
+        </button>
+      ))}
+      <button className="btn primary big" style={{marginTop:18}} disabled={!name.trim()} onClick={()=>onDone(name.trim(),style,region)}>この選手でデビュー！</button>
+    </div>
+  );
+}
+
+// ─── 先輩あいさつ ─────────────────────────────────────────────
+function SenpaiIntroScreen({career,onDone}){
+  return(
+    <div className="screen pad center">
+      <div style={{width:"100%",maxWidth:400}}>
+        <Senpai mood="smug" size="big" text={"よう、新入り。お前の指導係になった "+SENPAI_NAME+" だ。元S級S班、競輪場じゃ『鉄の漢』で通ってた。"}/>
+        <div style={{height:12}}/>
+        <Senpai mood="calm" text="いいか、競輪は脚だけじゃ勝てねえ。位置取り、風よけ、仕掛けどころ…全部レースで体に叩き込め。"/>
+        <div style={{height:12}}/>
+        <Senpai mood="angry" text={"目指すは頂点・SS班だ。半端な走りは許さねえぞ。…さあ、行くぞ "+career.name+"！"}/>
+        <button className="btn primary big" style={{marginTop:18}} onClick={onDone}>「押忍！よろしくお願いします！」</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── ホーム ──────────────────────────────────────────────────
+function HomeScreen({career,onTrain,onRace,onMock,onShop,onRanking,onVersus,onReset}){
+  const cond=conditionInfo(career.fatigue);const req=RANK_REQ[career.rank];
+  const noTrain=career.trainLeft<=0;const[cr,setCr]=useState(false);
+  return(
+    <div className="screen pad">
+      <div className="homeheader">
+        <div><div className="homename">{career.name}</div>
+          <div className="homerank">
+            <span className="rankbadge">{RANK_LABEL[career.rank]}</span>
+            <span className="stylebadge">{STYLES[career.style].label}</span>
+            <span className="regionbadge" style={{color:REGION_COLORS[career.region]}}>{career.region}</span>
+          </div>
+        </div>
+        <div className="condbox" style={{borderColor:cond.color}}><div className="condicon">{cond.icon}</div><div className="condlabel" style={{color:cond.color}}>{cond.label}</div></div>
+      </div>
+      <div className="card">
+        <StatBar label="パワー" value={career.stats.pow} color="#f06a6a"/>
+        <StatBar label="スピード" value={career.stats.spd} color="#7ee0ff"/>
+        <StatBar label="スタミナ" value={career.stats.sta} color="#7ee08a"/>
+        <StatBar label="テクニック" value={career.stats.tec} color="#ba93f5"/>
+      </div>
+      {career.rank!=="SS"?(
+        <div className="card">
+          <div className="rowbetween"><span className="mini">SS班への道</span><span className="mini bold">{career.points}/{req}</span></div>
+          <div className="progbg"><div className="progfill" style={{width:clamp((career.points/req)*100,0,100)+"%"}}/></div>
+          <div className="mini dim" style={{marginTop:6}}>着順に応じて競走得点を獲得。貯めると{RANK_LABEL[RANKS[RANKS.indexOf(career.rank)+1]]}へ昇格！</div>
+        </div>
+      ):(
+        <div className="card gold"><div className="bold">👑 S級S班 — 競輪界の頂点9人に到達！</div><div className="mini" style={{marginTop:4}}>本番レースはKEIRINグランプリ。優勝賞金1億円超の夢舞台だ！</div></div>
+      )}
+      <div className="card">
+        <div className="rowbetween"><span>💰 獲得賞金</span><span className="money">{career.money}万円</span></div>
+        <div className="rowbetween" style={{marginTop:6}}><span className="mini dim">通算成績</span><span className="mini">{career.rec.races}走 {career.rec.wins}勝（3着内 {career.rec.podium}）{career.rec.gp>0?" / GP制覇"+career.rec.gp:""}</span></div>
+        <div className="rowbetween" style={{marginTop:6}}><span className="mini dim">練習できる回数</span><span className={"mini bold "+(noTrain?"orange":"green")}>あと{career.trainLeft}回</span></div>
+      </div>
+      <button className="btn primary big" disabled={noTrain} onClick={onTrain}>💪 練習する{noTrain?"（今期は終了）":"（あと"+career.trainLeft+"回）"}</button>
+      <div className="btnrow">
+        <button className="btn ghost half" onClick={onMock}>🚲 模擬レース<br/><span className="mini dim">記録に残らない練習走行</span></button>
+        <button className="btn race half" onClick={onRace}>🏁 本番レース<br/><span className="mini">{GRADE_LABEL[career.rank]}・得点がかかる</span></button>
+      </div>
+      <div className="btnrow">
+        <button className="btn ghost half" onClick={onShop}>🛒 ショップ<br/><span className="mini dim">賞金で装備・乗り物を購入</span></button>
+        <button className="btn ghost half" onClick={onRanking}>🏁 全国ランキング<br/><span className="mini dim">{career.bestAgari!=null?"自己ベスト "+career.bestAgari.toFixed(2)+"秒":"上がりタイムで競う"}</span></button>
+      </div>
+      <button className="btn ghost big" style={{marginTop:10}} onClick={onVersus}>🆚 オンライン対戦 <span className="mini dim">（全国のプレイヤーと上がりタイム勝負）</span></button>
+      <div style={{marginTop:24,textAlign:"center"}}>
+        {!cr?<button className="linkbtn" onClick={()=>setCr(true)}>データを最初から…</button>:(
+          <div><div className="mini" style={{marginBottom:6}}>本当に削除しますか？</div>
+            <button className="btn danger" onClick={onReset}>削除する</button>
+            <button className="btn ghost" style={{marginLeft:8}} onClick={()=>setCr(false)}>やめる</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── 練習 ────────────────────────────────────────────────────
+function TrainingScreen({career,onPick,onBack}){
+  const[result,setResult]=useState(null);const cond=conditionInfo(career.fatigue);
+  return(
+    <div className="screen pad">
+      <div className="rowbetween"><h2 className="h2">練習</h2><span className="mini" style={{color:cond.color}}>{cond.icon} {cond.label}・残り{career.trainLeft}回</span></div>
+      <div className="mini dim" style={{margin:"0 2px 12px"}}>練習で疲労が溜まり体調が落ちる。休養も大事な仕事。体調はレースに影響する。</div>
+      {result&&<div className={"card trainresult "+(result.crit?"gold":"")}><div className="bold">{result.text}</div>{result.sub&&<div className="mini" style={{marginTop:4}}>{result.sub}</div>}</div>}
+      {result&&<div style={{marginBottom:12}}><Senpai mood={result.senpai.m} text={result.senpai.t}/></div>}
+      {!result&&TRAININGS.map(t=>(
+        <button key={t.id} className="traincard" onClick={()=>setResult(onPick(t.id))}>
+          <span className="trainicon">{t.icon}</span>
+          <span className="trainbody"><span className="bold">{t.name}</span><span className="mini dim">{t.desc}</span></span>
+        </button>
+      ))}
+      {result&&<button className="btn primary big" onClick={onBack}>ホームへ戻る</button>}
+    </div>
+  );
+}
+
+// ─── ショップ ─────────────────────────────────────────────────
+function ShopScreen({career,onBuy,onBack}){
+  const[cat,setCat]=useState("parts");
+  const cats=[{id:"parts",label:"自転車パーツ",icon:"⚙️"},{id:"fashion",label:"服・ファッション",icon:"👕"},{id:"car",label:"乗り物",icon:"🚗"}];
+  const today=React.useMemo(()=>shopToday(daySeed()),[]);
+  const items=SHOP_ITEMS.filter(i=>i.cat===cat);
+  return(
+    <div className="screen pad">
+      <div className="rowbetween" style={{marginBottom:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <button onClick={onBack} style={{background:"none",border:"none",color:"#8d9cbe",fontSize:22,cursor:"pointer"}}>←</button>
+          <h2 className="h2" style={{margin:0}}>ショップ</h2>
+        </div>
+        <span className="money">💰 {career.money}万円</span>
+      </div>
+      <div className="mini dim" style={{margin:"0 2px 10px"}}>🔄 品揃えは毎日入れ替わります。⭐の本日の特価品はお買い得！</div>
+      <div className="catbar">{cats.map(c=><button key={c.id} className={"catbtn "+(cat===c.id?"sel":"")} onClick={()=>setCat(c.id)}>{c.icon} {c.label}</button>)}</div>
+      {items.map(item=>{
+        const owned=(career.owned||[]).includes(item.id);
+        const st=today[item.id]||{inStock:true,deal:false};
+        const price=dealPrice(item,today);
+        const can=career.money>=price;
+        const avail=owned||st.inStock;
+        return(
+          <div key={item.id} className={"shopitem "+(owned?"owned":"")+(!avail?" soldout":"")+(st.deal&&!owned?" deal":"")}>
+            <div className="shopicon">{item.icon}</div>
+            <div className="shopbody">
+              <div className="shopname">{st.deal&&!owned&&<span className="dealtag">⭐特価</span>}{item.name}{owned&&" ✓"}</div>
+              <div className="shopdesc">{item.desc}</div>
+              {item.stat&&<div className="shopbonus">+{item.bonus} {STAT_LABEL[item.stat]}{item.stat2?` / +${item.bonus2} ${STAT_LABEL[item.stat2]}`:""}</div>}
+            </div>
+            <div className="shopright">
+              {st.deal&&!owned?<div className="shopprice"><span className="oldprice">{item.price}</span> {price}万円</div>:<div className="shopprice">{item.price}万円</div>}
+              {owned?<div className="shopowned">購入済</div>:!st.inStock?<div className="shopsoldout">明日入荷</div>:<button className={"btn "+(can?"primary":"ghost")+" shopbuy"} disabled={!can} onClick={()=>onBuy(item,price)}>{can?"購入":"足りない"}</button>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── 全国ランキング ──────────────────────────────────────────
+function RankingScreen({career,onBack}){
+  const best=career.bestAgari!=null?career.bestAgari:null;
+  const myUid=uidOf(career);
+  const[entries,setEntries]=useState(null);
+  useEffect(()=>{let on=true;(async()=>{const e=await loadRanking();if(on)setEntries(e);})();return()=>{on=false;};},[]);
+
+  const list=entries?buildBoard(entries,myUid,career):(best!=null?[{name:career.name,region:career.region,time:best,rank:career.rank,isP:true}]:[]);
+  const myIdx=list.findIndex(e=>e.isP);
+  const rank=myIdx>=0?myIdx+1:null;
+  const total=list.length;
+  let rows=[];
+  if(myIdx<0){rows=list.slice(0,20).map((e,i)=>({e,i}));}
+  else{
+    const top=list.slice(0,8).map((e,i)=>({e,i}));
+    const around=[];
+    for(let i=Math.max(8,myIdx-3);i<=Math.min(list.length-1,myIdx+3);i++)around.push({e:list[i],i});
+    const seen=new Set(top.map(r=>r.i));
+    rows=[...top];
+    if(around.length&&around[0].i>8)rows.push({gap:true});
+    around.forEach(r=>{if(!seen.has(r.i))rows.push(r);});
+  }
+  const onlyMe=entries&&total<=1;
+  return(
+    <div className="screen pad">
+      <div className="rowbetween">
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <button onClick={onBack} style={{background:"none",border:"none",color:"#8d9cbe",fontSize:22,cursor:"pointer"}}>←</button>
+          <h2 className="h2" style={{margin:0}}>🏁 全国ランキング</h2>
+        </div>
+      </div>
+      <div className="mini dim" style={{margin:"0 2px 12px"}}>ラスト200mの「上がりタイム」を全国のプレイヤーと競う（小さいほど速い）。本番レースであなたのベストが更新され、記録が共有されます。</div>
+
+      <div className="rankhero">
+        <div>
+          <div className="mini dim">あなたの自己ベスト</div>
+          <div className="rankbig">{best!=null?best.toFixed(2):"--.--"}<span className="ranksec">秒</span></div>
+        </div>
+        <div style={{textAlign:"right"}}>
+          <div className="mini dim">現在の順位</div>
+          <div className="rankpos">{rank!=null?rank:"-"}<span className="ranksec">位</span></div>
+          <div className="mini dim">/ {total||"-"}人中</div>
+        </div>
+      </div>
+
+      {entries===null&&<div className="card"><div className="mini dim">ランキングを読み込み中…</div></div>}
+      {best==null&&<div className="card"><div className="mini">まだ記録がありません。本番レースを走って、最初の上がりタイムを刻もう！</div></div>}
+      {onlyMe&&best!=null&&<div className="card"><div className="mini">🥇 現在あなたがトップ！このアプリを<span className="em">公開</span>して友達が遊ぶと、記録が共有されてランキングで競えます。</div></div>}
+
+      {list.length>0&&(
+        <div className="card" style={{padding:"6px 4px"}}>
+          {rows.map((r,k)=>r.gap?(
+            <div key={"gap"+k} className="rankgap">⋮</div>
+          ):(
+            <div key={r.i} className={"rankrow"+(r.e.isP?" me":"")}>
+              <span className="rankno">{r.i+1}</span>
+              <span className="rankmedal">{r.i===0?"🥇":r.i===1?"🥈":r.i===2?"🥉":""}</span>
+              <span className="rankname">{r.e.name}{r.e.isP?"（あなた）":""}</span>
+              <span className="rankbadge2">{RANK_LABEL[r.e.rank]||""}</span>
+              <span className="ranktime">{r.e.time.toFixed(2)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="card">
+        <div className="bold mini" style={{marginBottom:6}}>⏱ 上がりタイムの決まり方</div>
+        <div className="mini dim" style={{lineHeight:1.8}}>スピード・パワー・スタミナ・テクニック（位置取り）の総合力に加え、<span className="em">仕掛けるタイミング</span>と<span className="em">スパートの連打</span>で変動。風よけを活かして脚を温存し、絶妙なタイミングで全力連打すると上がりが伸びる。理論上の限界は約6.5秒。</div>
+      </div>
+      <button className="btn ghost big" onClick={onBack}>ホームへ戻る</button>
+    </div>
+  );
+}
+
+// ─── 出走表 ──────────────────────────────────────────────────
+function EntryScreen({career,ctx,mode,onStart,onBack,showTip,onTipClose}){
+  const[strat,setStrat]=useState(null);
+  const so=strat?STRATS.find(x=>x.id===strat):null;const solo=so&&so.slot<0;
+  const isVs=mode==="versus";const isMock=mode==="mock";
+  const renderRow=r=>(
+    <div key={r.car} className={"riderrow "+(r.isP?"me":r.isOpp?"opp":"")}>
+      <CarChip car={r.car}/><span className="ridername">{r.name}{r.isP?"（あなた）":r.isOpp?" 🆚対戦相手":""}</span>
+      <span className="riderstyle">{STYLES[r.styleId].label}</span>
+      <span className="riderstars">{"★".repeat(starsOf(r.stats))}{"☆".repeat(5-starsOf(r.stats))}</span>
+    </div>
+  );
+  const title=isVs?"🆚 オンライン対戦 出走表":isMock?"🚲 模擬レース 出走表":"🏁 "+GRADE_LABEL[career.rank]+" 出走表";
+  return(
+    <div className="screen pad">
+      <h2 className="h2">{title}</h2>
+      <div className="mini dim" style={{margin:"0 2px 10px"}}>{isVs?"🆚マークが対戦相手。本編と同じ形式のレースだ。相手より前でゴールせよ！":"同じ地区の選手は「ライン」を組んで協力。展開を予想しよう！"}</div>
+      {ctx.lines.map((ln,li)=>{
+        let rows=ln.aiRiders.slice();if(ln.isPlayerLine&&so&&so.slot>=0)rows.splice(so.slot,0,ctx.player);
+        return(
+          <div key={li} className="linegroup" style={{borderColor:(REGION_COLORS[ln.region]||"#888")+"88"}}>
+            <div className="linehead" style={{color:REGION_COLORS[ln.region]||"#aaa"}}>{ln.region}ライン{ln.isPlayerLine?"（あなたの地区）":""}</div>
+            {rows.map(renderRow)}
+          </div>
+        );
+      })}
+      {solo&&<div className="linegroup" style={{borderColor:"#ffd34d88",background:"#1a1608"}}><div className="linehead" style={{color:"#ffd34d"}}>単騎（ラインを離れて勝負）</div>{renderRow(ctx.player)}</div>}
+      <div className="fieldlabel" style={{margin:"16px 2px 6px"}}>作戦を選ぶ</div>
+      {STRATS.map(s=>(
+        <button key={s.id} className={"stylecard "+(strat===s.id?"sel":"")} onClick={()=>setStrat(s.id)}>
+          <div className="stylehead"><span className="stylename">{s.label}</span>{strat===s.id&&<span className="selmark">✔ 選択中</span>}</div>
+          <div className="styledesc">{s.desc}</div><div className="strathint">💡 {s.hint}</div>
+        </button>
+      ))}
+      <button className="btn primary big pulse" style={{marginTop:14}} disabled={!strat} onClick={()=>onStart(STRATS.find(x=>x.id===strat))}>{isVs?"対戦スタート！":isMock?"スタート！":"出走する！"}</button>
+      <button className="btn ghost big" style={{marginTop:10}} onClick={onBack}>{isVs?"対戦をやめる":"ホームへ戻る"}</button>
+      {showTip&&(<div className="overlay"><div className="tutcard">
+        <div className="tuttitle">📋 出走表の見方</div>
+        <div className="tutbody">選手の番号と色は全国共通（1白・2黒・3赤…）。「脚質」は戦い方のタイプで、同じ地区の選手は<span className="em">ライン</span>を組んで前後に並びます。先頭は風を受ける代わりに主導権を握り、後ろは風よけで脚を溜める——これが競輪の基本構造！</div>
+        <div className="tutunlock">📖 覚えておこう：ライン／脚質／車番と色</div>
+        <button className="btn primary big" onClick={onTipClose}>なるほど！</button>
+      </div></div>)}
+    </div>
+  );
+}
+
+// ─── レースScreen ────────────────────────────────────────────
+function RaceScreen({ctx,career,strategy,mode,onFinish}){
+  const isMock=mode!=="real";const isVs=mode==="versus";
+  const cvsRef=useRef(null),wrapRef=useRef(null),simRef=useRef(null);
+  const intentRef=useRef("keep"),tapsRef=useRef([]),finishedRef=useRef(false);
+  const[phase,setPhase]=useState("pack");
+  const[banner,setBanner]=useState(null);
+  const[hud,setHud]=useState({sta:1,tired:false,draft:false});
+  const[tut,setTut]=useState(null);
+  const[tapFx,setTapFx]=useState(0);
+  const[feed,setFeed]=useState([]);
+  const tutorial=!career.tutorialDone&&!isMock;
+
+  useEffect(()=>{
+    bgm.start("race");
+    const sim=createSim(ctx,career,strategy,tutorial);
+    simRef.current=sim;
+    const canvas=cvsRef.current;
+    const dpr=Math.min(2,window.devicePixelRatio||1);
+    const resize=()=>{
+      const w=wrapRef.current?wrapRef.current.clientWidth:360;
+      const h=Math.min(286,Math.max(228,w*0.64));
+      canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+"px";canvas.style.height=h+"px";
+    };
+    resize();window.addEventListener("resize",resize);
+    let raf=0,last=performance.now(),bTimer=null;
+    const hudTimer=setInterval(()=>{const p=sim.riders.find(r=>r.isP);setHud({sta:p.sta/p.staMax,tired:p.tired,draft:p.draft});},110);
+    const loop=now=>{
+      const rdt=Math.min(0.05,(now-last)/1000);last=now;
+      tapsRef.current=tapsRef.current.filter(t=>now-t<850);
+      sim.playerThrottle=Math.min(1,tapsRef.current.length/6);
+      sim.intent=intentRef.current;
+      if(!sim.paused){let adv=rdt*calcTS(sim);while(adv>0){const st=Math.min(adv,1/45);stepSim(sim,st);adv-=st;}}
+      if(sim.shake>0)sim.shake=Math.max(0,sim.shake-rdt*14);
+      while(sim.events.length){
+        const e=sim.events.shift();
+        if(e.type==="banner"){setBanner({text:e.text,sub:e.sub,id:Math.random()});if(bTimer)clearTimeout(bTimer);bTimer=setTimeout(()=>setBanner(null),2300);}
+        else if(e.type==="phase")setPhase(e.v);
+        else if(e.type==="bell")bellSound();
+        else if(e.type==="comment")setFeed(f=>[{id:Math.random(),text:e.text},...f].slice(0,4));
+        else if(e.type==="tut"){sim.paused=true;setTut(e.step);}
+      }
+      drawRaceView(canvas,sim,dpr);
+      if(sim.done&&!finishedRef.current){finishedRef.current=true;bgm.start("victory");setTimeout(()=>onFinish(sim.results.map(r=>({car:r.car,name:r.name,styleId:r.styleId,region:r.region,isP:r.isP,isOpp:r.isOpp,place:r.place,stats:r.stats})),{draftSec:sim.tele.draftSec,runSec:sim.tele.runSec,spurtRem:sim.tele.spurtRem,tired:sim.tele.tired,mashSum:sim.tele.mashSum,mashTicks:sim.tele.mashTicks}),1600);}
+      raf=requestAnimationFrame(loop);
+    };
+    raf=requestAnimationFrame(loop);
+    return()=>{cancelAnimationFrame(raf);clearInterval(hudTimer);if(bTimer)clearTimeout(bTimer);window.removeEventListener("resize",resize);};
+  },[]);
+
+  const closeTut=()=>{if(simRef.current)simRef.current.paused=false;setTut(null);};
+  const doSpurt=()=>{const sim=simRef.current;const p=sim.riders.find(r=>r.isP);if(p.state==="pack"){p.state="spurt";sim.tele.spurtRem=sim.total-p.d;setPhase("spurt");spurtSound();sim.shake=5;if(tutorial&&!sim.flags.tutSpurt){sim.flags.tutSpurt=true;sim.events.push({type:"tut",step:"spurt"});}}};
+  const mash=()=>{tapsRef.current.push(performance.now());setTapFx(v=>v+1);if(tapsRef.current.length%4===0)beep(560+Math.random()*120,0.04,0.035);};
+  const phaseLabel=phase==="pack"?"周回中｜誘導員に続いて脚を溜めよう":phase==="ready"?"勝負どころ｜スパートのタイミングを見極めろ！":phase==="spurt"?"全力スパート中！連打で踏み込め！！":"ゴール！結果集計中…";
+  const tutData=tut?TUT_STEPS[tut]:null;
+  const staColor=hud.sta>0.5?"#7ee08a":hud.sta>0.25?"#ffd34d":"#f06a6a";
+
+  return(
+    <div className="screen race" ref={wrapRef}>
+      <div className="racetop"><span className="racemode">{isVs?"🆚 オンライン対戦":isMock?"🚲 模擬レース":"🏁 "+GRADE_LABEL[career.rank]}</span>{ctx.venue&&<span className="racevenue">📍{ctx.venue.name}</span>}<span className="racestrat">{strategy.label}</span></div>
+      <div className="canvaswrap">
+        <canvas ref={cvsRef}/>
+        {banner&&<div key={banner.id} className="banner"><div className="bannermain">{banner.text}</div>{banner.sub&&<div className="bannersub">{banner.sub}</div>}</div>}
+        <div className="feed">{feed.map((f,i)=><div key={f.id} className="feedline" style={{opacity:1-i*0.24}}>🎙 {f.text}</div>)}</div>
+      </div>
+      <div className="lineband">
+        <span className="lineband-label">ライン</span>
+        <div className="lineband-scroll">
+          {ctx.lines.map((ln,li)=>{
+            let lcars=ln.cars.slice();
+            if(ln.isPlayerLine&&strategy.slot>=0)lcars.splice(strategy.slot,0,ctx.player.car);
+            return(
+              <div key={li} className="lineband-grp" style={{borderColor:(REGION_COLORS[ln.region]||"#888")}}>
+                <span className="lineband-region" style={{color:REGION_COLORS[ln.region]||"#aaa"}}>{ln.region.slice(0,2)}</span>
+                {lcars.map(c=><span key={c} className={"lineband-chip"+(c===ctx.player.car?" me":"")} style={{background:CAR_COLORS[c].bg,color:CAR_COLORS[c].fg,borderColor:c===1?"#999":"#0b0e18"}}>{c}</span>)}
+              </div>
+            );
+          })}
+          {strategy.slot<0&&(
+            <div className="lineband-grp solo" style={{borderColor:"#ffd34d"}}>
+              <span className="lineband-region" style={{color:"#ffd34d"}}>単騎</span>
+              <span className="lineband-chip me" style={{background:CAR_COLORS[ctx.player.car].bg,color:CAR_COLORS[ctx.player.car].fg,borderColor:"#ffd34d"}}>{ctx.player.car}</span>
+            </div>
+          )}
+        </div>
+      </div>
+      <RaceAdBanner/>
+      <div className="phaselabel">{phaseLabel}</div>
+      <div className="stamwrap">
+        <span className="mini" style={{width:58}}>スタミナ</span>
+        <div className="stambg"><div className="stamfill" style={{width:hud.sta*100+"%",background:staColor}}/></div>
+        <span className="draftind" style={{opacity:hud.draft?1:0.25}}>🌬風よけ中</span>
+      </div>
+      <div className="controls">
+        {(phase==="pack"||phase==="ready")&&(
+          <div className="posrow">
+            <button className="posbtn" onPointerDown={()=>{intentRef.current="up";}} onPointerUp={()=>{intentRef.current="keep";}} onPointerLeave={()=>{intentRef.current="keep";}}>▲<br/><span className="mini">前へ</span></button>
+            <div className="poscenter mini dim">押している間<br/>位置を調整</div>
+            <button className="posbtn" onPointerDown={()=>{intentRef.current="down";}} onPointerUp={()=>{intentRef.current="keep";}} onPointerLeave={()=>{intentRef.current="keep";}}>▼<br/><span className="mini">後ろへ</span></button>
+          </div>
+        )}
+        {phase==="pack"&&<div className="spurtwait mini dim">🔒 スパート解禁は誘導員退避後（💡{strategy.hint}）</div>}
+        {phase==="ready"&&<button className="spurtbtn" onClick={doSpurt}>🚀 スパート！！</button>}
+        {phase==="spurt"&&(
+          <div className="mashzone" onPointerDown={mash}>
+            <div className={"sprinter "+(tapFx%2===0?"a":"b")}>
+              <div className="sprbike">🚴</div>
+              <div className="sprpush">踏め!!</div>
+            </div>
+            <div className="mini" style={{marginTop:4}}>連打でペダルを踏み込め！スタミナに注意！</div>
+          </div>
+        )}
+        {phase==="done"&&<div className="spurtwait mini">🏁 ゴール！まもなく結果発表…</div>}
+      </div>
+      {tutData&&(<div className="overlay"><div className="tutcard">
+        <div className="tutstep">チュートリアル</div><div className="tuttitle">{tutData.t}</div>
+        <div className="tutbody">{tutData.body}</div>
+        {tutData.unlock.length>0&&<div className="tutunlock">📖 覚えておこう：{tutData.unlock.map(id=>ZUKAN.find(z=>z.id===id).t).join("／")}</div>}
+        <button className="btn primary big" onClick={closeTut}>OK！</button>
+      </div></div>)}
+    </div>
+  );
+}
+
+// ─── 勝利者インタビュー ──────────────────────────────────────
+const AI_WIN_LINES=[
+  "最高のレースでした。もっと強くなって次も勝ちます！",
+  "チームのみんなのおかげです。ありがとうございました！",
+  "作戦通りの走りができました。今日は最高の日です！",
+  "このままSS班を目指して、一戦一戦全力で行きます！",
+  "正直ギリギリでした…でも絶対に負けたくなかった！",
+  "風よけからの差しが決まりました。理想的な展開でしたね。",
+  "応援が力になりました。ファンの皆さんに感謝です！",
+  "上がりタイムも手応えがありました。記録も狙っていきます！",
+  "ライバルが強いほど燃えます。次の対戦も楽しみです！",
+  "練習でやってきたことを出せました。自信になります。",
+];
+function WinnerInterviewScreen({results,isPlayerWon,career,onDone}){
+  const winner=results[0];
+  const[qs]=useState(()=>shuffle(WIN_QA).slice(0,2));
+  const[qIdx,setQIdx]=useState(0);const[choice,setChoice]=useState(null);
+  if(!isPlayerWon){
+    return(
+      <div className="screen pad">
+        <div className="interviewtag">🏆 優勝インタビュー</div>
+        <div className="wincard">
+          <CarChip car={winner.car} size={48}/>
+          <div style={{marginTop:8}} className="h2">{winner.name}</div>
+          <div className="mini" style={{marginTop:4}}>{STYLES[winner.styleId].label}・{winner.region}</div>
+        </div>
+        <div style={{marginTop:16}}><Reporter text={pick(AI_WIN_LINES)}/></div>
+        <div style={{marginTop:14}}><Senpai mood="calm" text={pick(["負けは負けだ。次のレースで取り返せ。","勝った奴をよく見とけ。盗めるもんは全部盗め。","悔しいか？その悔しさが、お前を強くするんだ。"])}/></div>
+        <button className="btn primary big" style={{marginTop:16}} onClick={onDone}>次へ</button>
+      </div>
+    );
+  }
+  const q=qs[qIdx];const opt=q.opts[choice];
+  return(
+    <div className="screen pad">
+      <div className="interviewtag">🎤 優勝インタビュー！！</div>
+      <div className="wincard">
+        <CarChip car={winner.car} size={52}/>
+        <div className="h2" style={{marginTop:8}}>{career.name} 選手</div>
+        <div className="mini">{GRADE_LABEL[career.rank]}優勝！</div>
+      </div>
+      <div style={{marginTop:14}}><Reporter text={q.q}/></div>
+      {choice===null?(
+        <div style={{marginTop:12}}>{q.opts.map((o,i)=>(
+          <button key={i} className="stylecard" onClick={()=>{setChoice(i);beep(880,0.1,0.06);}}>
+            <span className="styledesc">「{o.t}」</span>
+          </button>
+        ))}</div>
+      ):(
+        <div style={{marginTop:12}}>
+          <div className="card" style={{background:"#1a2a10",borderColor:"#3a6a20"}}>
+            <div className="mini" style={{color:"#8acd6a",marginBottom:4}}>あなたの回答</div>
+            <div className="styledesc">「{opt.t}」</div>
+          </div>
+          <div style={{marginTop:10}}><Senpai mood={opt.sm} text={opt.st}/></div>
+          {qIdx<qs.length-1?(
+            <button className="btn ghost big" style={{marginTop:12}} onClick={()=>{setQIdx(q=>q+1);setChoice(null);}}>次の質問へ</button>
+          ):(
+            <button className="btn primary big" style={{marginTop:12}} onClick={onDone}>インタビュー終了</button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── 結果 ─────────────────────────────────────────────────────
+function ResultScreen({results,gains,career,tele,isMock,onHome,onEnding}){
+  const me=results.find(r=>r.isP);const fb=senpaiFeedback(tele,me.place);
+  return(
+    <div className="screen pad">
+      <h2 className="h2">{isMock?"模擬レース結果":"レース結果"}</h2>
+      <div className={"resulthero "+(me.place===1?"win":me.place<=3?"podium":"")}>
+        <div className="resultplace">{me.place}<span className="resultchaku">着</span></div>
+        <div className="mini">{me.place===1?"🏆 優勝！！見事な走り！":me.place<=3?"🎉 上位入着！ナイスレース！":"次のレースで巻き返そう！"}</div>
+      </div>
+      <div style={{marginBottom:12}}><Senpai mood={fb.m} text={fb.t}/></div>
+      <div className="card">{results.map(r=>(
+        <div key={r.car} className={"riderrow "+(r.isP?"me":"")}>
+          <span className="placecell">{r.place}着</span><CarChip car={r.car} size={22}/>
+          <span className="ridername">{r.name}{r.isP?"（あなた）":""}</span>
+          <span className="riderstyle">{STYLES[r.styleId].label}</span>
+        </div>
+      ))}</div>
+      {isMock?(
+        <div className="card"><div className="mini dim">🚲 模擬レースのため得点・賞金・ランキングは加算されません。</div>
+          <div className="rowbetween" style={{marginTop:8}}><span className="mini">風よけ率</span><span className="bold">{tele.runSec>1?Math.round((tele.draftSec/tele.runSec)*100):0}%</span></div>
+          <div className="rowbetween" style={{marginTop:6}}><span className="mini">参考・上がりタイム</span><span className="bold" style={{color:"#7ee0ff"}}>{gains.agari!=null?gains.agari.toFixed(2)+"秒":"--"}</span></div>
+        </div>
+      ):(
+        <div className="card">
+          <div className="rowbetween"><span>📈 競走得点</span><span className="bold plus">+{gains.pts}点</span></div>
+          <div className="rowbetween"><span>💰 賞金</span><span className="bold plus">+{gains.money}万円</span></div>
+          <div className="rowbetween"><span>💪 {STAT_LABEL[gains.statKey]}</span><span className="bold plus">+{gains.statAmt}</span></div>
+          <div className="agaribox">
+            <div className="rowbetween"><span className="mini">⏱ 上がりタイム（ラスト200m）</span><span className="agaritime">{gains.agari.toFixed(2)}<span className="ranksec">秒</span></span></div>
+            {gains.agariPB?(
+              <div className="agaripb">🎉 自己ベスト更新！ 全国ランキングに記録を送信しました（{gains.agariBest!=null?gains.agariBest.toFixed(2):"--"}秒）</div>
+            ):(
+              <div className="mini dim" style={{marginTop:4}}>自己ベスト {gains.agariBest!=null?gains.agariBest.toFixed(2)+"秒":"--"}。連打と仕掛けを磨いて更新を狙え！</div>
+            )}
+          </div>
+          {gains.prevRank!=="SS"&&(<div style={{marginTop:10}}>
+            <div className="rowbetween mini dim"><span>SS班まで</span><span>{gains.newPoints}/{RANK_REQ[gains.prevRank]}</span></div>
+            <div className="progbg"><div className="progfill" style={{width:clamp((gains.newPoints/RANK_REQ[gains.prevRank])*100,0,100)+"%"}}/></div>
+          </div>)}
+        </div>
+      )}
+      {!isMock&&gains.promoted&&<div className="card gold promo"><div className="bold">🎉 {RANK_LABEL[gains.promoted]} に昇格！！</div><div className="mini" style={{marginTop:4}}>{gains.promoted==="SS"?"ついに頂点・S級S班へ！次の本番はKEIRINグランプリだ！":"より強い相手のレースへ！漢の階段を上れ！"}</div></div>}
+      {gains&&gains.gpWin?(<button className="btn primary big pulse" onClick={onEnding}>🏆 表彰セレモニーへ</button>):(<button className="btn primary big" onClick={onHome}>ホームへ戻る</button>)}
+    </div>
+  );
+}
+
+// ─── エンディング ────────────────────────────────────────────
+function EndingScreen({career,onClose}){
+  return(
+    <div className="screen center">
+      <div className="flamebg">{Array.from({length:24}).map((_,i)=><span key={i} className="flame" style={{left:(i*4.2-1)+"%",animationDelay:(i%6)*0.2+"s",animationDuration:(1+(i%4)*0.25)+"s",width:(14+(i%4)*9)+"px",height:(55+(i%5)*34)+"px"}}/>)}<div className="flameglow"/></div>
+      <div className="titlewrap zoomin">
+        <div className="endtrophy">🏆</div>
+        <h1 className="gametitle flametitle" style={{fontSize:34}}>頂点制覇</h1>
+        <div className="titlesub">{career.name}、漢の中の漢に</div>
+        <div className="card" style={{textAlign:"left",marginTop:18}}>
+          <div className="rowbetween"><span className="mini dim">通算成績</span><span>{career.rec.races}走 {career.rec.wins}勝</span></div>
+          <div className="rowbetween"><span className="mini dim">獲得賞金</span><span className="money">{career.money}万円</span></div>
+          <div className="rowbetween"><span className="mini dim">GP制覇</span><span>{career.rec.gp}回</span></div>
+        </div>
+        <div style={{marginTop:14}}><Senpai mood="happy" text={"よくやった、"+career.name+"！お前はもう立派なSS班、漢の中の漢だ。…競輪のルールも、全部その身体が覚えてるはずだぜ。"}/></div>
+        <button className="btn primary big" style={{marginTop:16}} onClick={onClose}>殿堂入りして走り続ける</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── オンライン対戦（フルレース形式・マッチング画面）──────────
+// 共有プールの実プレイヤー（または記録未登録時はCPU）が9車立てに1人混じり、
+// 本編と同じレース形式で直接対決。着順で勝敗が決まる。
+function OnlineVersusScreen({career,onStartVersus,onBack}){
+  const[stage,setStage]=useState("loading"); // loading/matched/solo
+  const[opp,setOpp]=useState(null);
+  const myUid=uidOf(career);
+  const rec=career.vs||{w:0,l:0};
+
+  const findOpponent=React.useCallback(async()=>{
+    setStage("loading");setOpp(null);
+    const pool=await loadVsPool(myUid);
+    if(pool.length>0){setOpp(pick(pool));setStage("matched");}else{setStage("solo");}
+  },[myUid]);
+  useEffect(()=>{findOpponent();},[findOpponent]);
+
+  const Header=()=>(
+    <div className="rowbetween" style={{marginBottom:10}}>
+      <div style={{display:"flex",alignItems:"center",gap:8}}>
+        <button onClick={onBack} style={{background:"none",border:"none",color:"#8d9cbe",fontSize:22,cursor:"pointer"}}>←</button>
+        <h2 className="h2" style={{margin:0}}>🆚 オンライン対戦</h2>
+      </div>
+      <span className="vsrecord">{rec.w}勝 {rec.l}敗</span>
+    </div>
+  );
+  const Wrap=({children})=>(
+    <div className="screen pad center"><Header/><div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",width:"100%"}}>{children}</div></div>
+  );
+
+  if(stage==="loading"){
+    return(<Wrap><div className="vsturn" style={{color:"#7ee0ff"}}>対戦相手を探索中…</div><div className="vsbike" style={{borderColor:"#7ee0ff",marginTop:20,animation:"bounce 1.2s infinite"}}>📡</div><div className="mini dim" style={{marginTop:18}}>全国のプレイヤーの記録とマッチング中</div></Wrap>);
+  }
+  if(stage==="matched"){
+    return(<Wrap>
+      <div className="mini dim">対戦相手が見つかった！</div>
+      <div className="vsoppcard">
+        <div className="vsoppava">🚴</div>
+        <div className="vsoppname">{opp.name}</div>
+        <div className="vsoppmeta"><span className="rankbadge">{RANK_LABEL[opp.rank]||"選手"}</span>{opp.region&&<span style={{color:REGION_COLORS[opp.region]||"#9fb0d0",fontSize:11,marginLeft:6}}>{opp.region}</span>}{opp.style&&STYLES[opp.style]&&<span className="riderstyle" style={{marginLeft:6}}>{STYLES[opp.style].label}</span>}</div>
+        <div className="vsoppghost">{opp.time!=null?"自己ベスト "+opp.time.toFixed(2)+"秒":"記録 ？.？？秒"}</div>
+      </div>
+      <div className="mini dim" style={{margin:"14px 0 0",maxWidth:300}}>本編と同じレース形式で直接対決！相手より前でゴールすれば勝ち。</div>
+      <button className="btn primary big pulse" style={{marginTop:18,maxWidth:280}} onClick={()=>onStartVersus(opp,false)}>対戦開始！</button>
+      <button className="linkbtn" style={{marginTop:14}} onClick={findOpponent}>別の相手を探す</button>
+    </Wrap>);
+  }
+  // solo（プール空）
+  return(<Wrap>
+    <div className="vsturn" style={{color:"#ffd34d"}}>対戦相手がいません</div>
+    <div className="card" style={{marginTop:16,maxWidth:340}}><div className="mini" style={{lineHeight:1.9}}>今オンラインに対戦相手が見つかりませんでした。<span className="em">CPUと一戦</span>すると、あなたの記録がプールに登録され、次に挑戦したプレイヤーがあなたに挑みます。アプリを<span className="em">公開</span>すると対戦相手が増えます！</div></div>
+    <button className="btn primary big pulse" style={{marginTop:20,maxWidth:280}} onClick={()=>onStartVersus(generateGhostOpp(career),true)}>CPUと走って記録を登録</button>
+    <button className="btn ghost big" style={{marginTop:10,maxWidth:280}} onClick={onBack}>ホームへ戻る</button>
+  </Wrap>);
+}
+
+// ─── オンライン対戦・結果 ────────────────────────────────────
+function VersusResultScreen({results,vsResult,career,onAgain,onHome}){
+  const me=results.find(r=>r.isP);
+  const opp=results.find(r=>r.isOpp);
+  const won=vsResult.outcome==="win";const ghost=vsResult.ghost;
+  return(
+    <div className="screen pad">
+      <div className="interviewtag">🆚 オンライン対戦 結果</div>
+      <div className={"resulthero "+(won?"win":"")}>
+        <div className="vswinner" style={{fontSize:30}}>{won?"🏆 勝利！！":"😢 敗北…"}</div>
+        <div className="mini" style={{marginTop:6}}>{ghost?"記録登録マッチ（CPU対戦）":"全国のプレイヤーとの直接対決"}</div>
+      </div>
+      <div className="vscompare" style={{justifyContent:"center",marginBottom:14}}>
+        <div className={"vscol"+(won?" win":"")}>
+          <div className="vscolname" style={{color:"#7ee0ff"}}>あなた</div>
+          <div className="vscoltime">{me.place}<span style={{fontSize:14}}>着</span></div>
+          <div className="mini dim">上がり {vsResult.myAgari.toFixed(2)}秒</div>
+        </div>
+        <div className="vsvs">VS</div>
+        <div className={"vscol"+(!won?" win":"")}>
+          <div className="vscolname" style={{color:"#ff8a73",maxWidth:96,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{opp?opp.name:vsResult.oppName}</div>
+          <div className="vscoltime">{opp?opp.place:"-"}<span style={{fontSize:14}}>着</span></div>
+          <div className="mini dim">{opp?STYLES[opp.styleId].label:""}</div>
+        </div>
+      </div>
+      {!ghost&&<div className="card"><div className="rowbetween"><span className="mini dim">通算成績</span><span className="bold">{(career.vs&&career.vs.w)||0}勝 {(career.vs&&career.vs.l)||0}敗</span></div></div>}
+      <div className="card">{results.map(r=>(
+        <div key={r.car} className={"riderrow "+(r.isP?"me":"")}>
+          <span className="placecell">{r.place}着</span><CarChip car={r.car} size={22}/>
+          <span className="ridername">{r.name}{r.isP?"（あなた）":r.isOpp?"（対戦相手）":""}</span>
+          <span className="riderstyle">{STYLES[r.styleId].label}</span>
+        </div>
+      ))}</div>
+      <button className="btn primary big" onClick={onAgain}>次の相手と対戦！</button>
+      <button className="btn ghost big" style={{marginTop:10}} onClick={onHome}>ホームへ戻る</button>
+    </div>
+  );
+}
+
+// ─── buildRace ───────────────────────────────────────────────
+function buildRace(career){
+  const band=RANK_BAND[career.rank];const cars=shuffle([1,2,3,4,5,6,7,8,9]);
+  const usedNames=new Set([career.name]);
+  const mkAI=(car,region,styleId)=>{let nm="";do{nm=pick(SURNAMES)+" "+pick(GIVENS);}while(usedNames.has(nm));usedNames.add(nm);return{car,name:nm,styleId,region,isP:false,stats:{pow:irnd(band[0],band[1]),spd:irnd(band[0],band[1]),sta:irnd(band[0],band[1]),tec:irnd(band[0],band[1])}};};
+  const otherR=shuffle(REGIONS.filter(r=>r!==career.region)).slice(0,2);
+  const player={car:cars[0],name:career.name,styleId:career.style,region:career.region,isP:true,stats:{...career.stats}};
+  const pAI=[mkAI(cars[1],career.region,"nige"),mkAI(cars[2],career.region,pick(["sashi","makuri"]))];
+  const lB=[mkAI(cars[3],otherR[0],"nige"),mkAI(cars[4],otherR[0],pick(["sashi","makuri"])),mkAI(cars[5],otherR[0],pick(["nige","makuri"]))];
+  const lC=[mkAI(cars[6],otherR[1],"nige"),mkAI(cars[7],otherR[1],"sashi"),mkAI(cars[8],otherR[1],pick(["makuri","sashi"]))];
+  const riders=[player,...pAI,...lB,...lC];
+  const lines=shuffle([
+    {region:career.region,isPlayerLine:true,cars:pAI.map(r=>r.car),aiRiders:pAI},
+    {region:otherR[0],isPlayerLine:false,cars:lB.map(r=>r.car),aiRiders:lB},
+    {region:otherR[1],isPlayerLine:false,cars:lC.map(r=>r.car),aiRiders:lC},
+  ]);
+  return{riders,lines,isGP:career.rank==="SS",player,venue:pick(VENUES)};
+}
+
+// 記録未登録（プール空）時のCPU対戦相手を生成
+function generateGhostOpp(career){
+  const band=RANK_BAND[career.rank];
+  return{name:pick(SURNAMES)+" "+pick(GIVENS),region:pick(REGIONS),rank:career.rank,style:pick(["nige","makuri","sashi"]),
+    stats:{pow:irnd(band[0],band[1]),spd:irnd(band[0],band[1]),sta:irnd(band[0],band[1]),tec:irnd(band[0],band[1])},ghost:true};
+}
+
+// オンライン対戦用のレース。相手プレイヤー(opp)を9車立てに1人混ぜる。
+function buildVersusRace(career,opp){
+  const band=RANK_BAND[career.rank];const cars=shuffle([1,2,3,4,5,6,7,8,9]);
+  const usedNames=new Set([career.name,opp.name]);
+  const mkAI=(car,region,styleId)=>{let nm="";do{nm=pick(SURNAMES)+" "+pick(GIVENS);}while(usedNames.has(nm));usedNames.add(nm);return{car,name:nm,styleId,region,isP:false,stats:{pow:irnd(band[0],band[1]),spd:irnd(band[0],band[1]),sta:irnd(band[0],band[1]),tec:irnd(band[0],band[1])}};};
+  // 相手のstats/styleは保存値を使用（古い記録で欠落していれば級班から推定）
+  const oppBand=RANK_BAND[opp.rank]||band;
+  const oppStats=opp.stats&&typeof opp.stats.pow==="number"?{...opp.stats}:{pow:irnd(oppBand[0],oppBand[1]),spd:irnd(oppBand[0],oppBand[1]),sta:irnd(oppBand[0],oppBand[1]),tec:irnd(oppBand[0],oppBand[1])};
+  const oppStyle=opp.style&&STYLES[opp.style]?opp.style:pick(["nige","makuri","sashi"]);
+  const oppRegion=opp.region||pick(REGIONS);
+  const player={car:cars[0],name:career.name,styleId:career.style,region:career.region,isP:true,stats:{...career.stats}};
+  const opponent={car:cars[1],name:opp.name,styleId:oppStyle,region:oppRegion,isP:false,isOpp:true,stats:oppStats};
+  const pMate=mkAI(cars[2],career.region,pick(["sashi","makuri"]));
+  const oMate=mkAI(cars[3],oppRegion,pick(["sashi","makuri"]));
+  const fillerR=shuffle(REGIONS.filter(r=>r!==career.region&&r!==oppRegion))[0]||pick(REGIONS);
+  const fA=mkAI(cars[4],fillerR,"nige"),fB=mkAI(cars[5],fillerR,pick(["sashi","makuri"])),fC=mkAI(cars[6],fillerR,pick(["makuri","sashi"]));
+  const fillR2=shuffle(REGIONS.filter(r=>r!==career.region&&r!==oppRegion&&r!==fillerR))[0]||pick(REGIONS);
+  const gA=mkAI(cars[7],fillR2,"nige"),gB=mkAI(cars[8],fillR2,"sashi");
+  const riders=[player,opponent,pMate,oMate,fA,fB,fC,gA,gB];
+  const lines=shuffle([
+    {region:career.region,isPlayerLine:true,cars:[pMate.car],aiRiders:[pMate]},
+    {region:oppRegion,isPlayerLine:false,cars:[opponent.car,oMate.car],aiRiders:[opponent,oMate]},
+    {region:fillerR,isPlayerLine:false,cars:[fA.car,fB.car,fC.car],aiRiders:[fA,fB,fC]},
+    {region:fillR2,isPlayerLine:false,cars:[gA.car,gB.car],aiRiders:[gA,gB]},
+  ]);
+  return{riders,lines,isGP:false,player,venue:pick(VENUES),isVersus:true,oppCar:opponent.car};
+}
+
+function newCareer(name,styleId,region){
+  const b=STYLES[styleId].b;
+  const uid="u"+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36);
+  return{v:3,uid,name,style:styleId,region,rank:"A3",stats:{pow:46+b.pow,spd:46+b.spd,sta:46+b.sta,tec:46+b.tec},fatigue:20,trainLeft:3,points:0,money:0,owned:[],rec:{races:0,wins:0,podium:0,gp:0},bestAgari:null,vs:{w:0,l:0},homeReturns:0,tutorialDone:false,entryTipDone:false,senpaiIntro:false};
+}
+
+// ─── インタースティシャル広告 ────────────────────────────────
+
+// ─── レース中バナー広告コンポーネント（AdSense） ────────────────
+function RaceAdBanner(){
+  useEffect(()=>{try{(window.adsbygoogle=window.adsbygoogle||[]).push({});}catch(e){}},[]);
+  return(
+    <div className="racead-adsense">
+      <ins className="adsbygoogle"
+        style={{display:"block",width:"100%",height:50}}
+        data-ad-client={ADSENSE_CLIENT}
+        data-ad-slot={ADSENSE_SLOT_BANNER}
+        data-ad-format="horizontal"
+        data-full-width-responsive="false"/>
+    </div>
+  );
+}
+
+function InterstitialAd({onClose}){
+  const[left,setLeft]=useState(3);
+  const[ad]=useState(()=>pick(ADS));
+  useEffect(()=>{if(left<=0)return;const t=setTimeout(()=>setLeft(l=>l-1),1000);return()=>clearTimeout(t);},[left]);
+  // AdSense ユニット push
+  useEffect(()=>{try{(window.adsbygoogle=window.adsbygoogle||[]).push({});}catch(e){}},[]);
+  return(
+    <div className="adoverlay">
+      <div className="adcard">
+        <div className="adbar">
+          <span className="adlabel">広告</span>
+          {left>0?<span className="adcount">{left}</span>:<button className="adclose" onClick={onClose}>✕ 閉じる</button>}
+        </div>
+        <div className="adbody-adsense">
+          <ins className="adsbygoogle"
+            style={{display:"block",width:"100%",minHeight:250}}
+            data-ad-client={ADSENSE_CLIENT}
+            data-ad-slot={ADSENSE_SLOT_INTERSTITIAL}
+            data-ad-format="rectangle"
+            data-full-width-responsive="true"/>
+        </div>
+        <div className="adnote">Google 広告{left>0?` ・ ${left}秒後に閉じられます`:""}</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── App ──────────────────────────────────────────────────────
+function App(){
+  const[screen,setScreen]=useState("title");
+  const[career,setCareer]=useState(null);
+  const[hasSave,setHasSave]=useState(false);
+  const[raceCtx,setRaceCtx]=useState(null);
+  const[strategy,setStrategy]=useState(null);
+  const[raceMode,setRaceMode]=useState("real"); // "real" | "mock" | "versus"
+  const[vsOpp,setVsOpp]=useState(null);
+  const[vsGhost,setVsGhost]=useState(false);
+  const[vsResult,setVsResult]=useState(null);
+  const[results,setResults]=useState(null);
+  const[gains,setGains]=useState(null);
+  const[tele,setTele]=useState(null);
+  const[raceKey,setRaceKey]=useState(0);
+  const[entryTip,setEntryTip]=useState(false);
+  const[savedData,setSavedData]=useState(null);
+  const[showAd,setShowAd]=useState(false);
+
+  // AdSense スクリプト読み込み & 広告ユニット初期化
+  useEffect(()=>{
+    if(document.getElementById('adsense-script'))return;
+    const s=document.createElement('script');
+    s.id='adsense-script';
+    s.async=true;
+    s.src=`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
+    s.crossOrigin='anonymous';
+    document.head.appendChild(s);
+  },[]);
+
+  useEffect(()=>{loadGame().then(d=>{if(d){if(!d.uid)d.uid="u"+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36);if(!d.vs)d.vs={w:0,l:0};if(d.homeReturns==null)d.homeReturns=0;setSavedData(d);setHasSave(true);}});},[]);
+
+  useEffect(()=>{
+    const h=(e)=>{
+      resumeAudio();
+      const t=e.target&&e.target.closest?e.target.closest("button,.stylecard,.traincard,.regionbtn,.catbtn,.zukancard,.shopbuy"):null;
+      if(t&&!t.disabled&&!(e.target.closest&&e.target.closest(".mashzone,.posbtn")))clickSound();
+    };
+    document.addEventListener("pointerdown",h,true);
+    return()=>document.removeEventListener("pointerdown",h,true);
+  },[]);
+
+  const onNew=()=>{bgm.start("theme");setScreen("intro");};
+  const onContinue=()=>{const c=savedData&&!savedData.uid?{...savedData,uid:"u"+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36)}:savedData;setCareer(c);bgm.start("theme");setScreen("home");};
+  const onIntroDone=()=>setScreen("create");
+  const onCreate=(name,style,region)=>{const c=newCareer(name,style,region);setCareer(c);saveGame(c);setScreen("senpai");};
+  const onSenpaiDone=()=>{const c={...career,senpaiIntro:true};setCareer(c);saveGame(c);setScreen("home");};
+
+  const doTrain=id=>{
+    const t=TRAININGS.find(x=>x.id===id);let c={...career,stats:{...career.stats}};let res;
+    if(t.stat){const cur=c.stats[t.stat];let gain=cur>=110?1:cur>=90?irnd(1,2):irnd(2,4);const crit=Math.random()<0.18;if(crit)gain*=2;c.stats[t.stat]=clamp(cur+gain,0,120);c.fatigue=clamp(c.fatigue+t.fat,0,100);res={crit,text:(crit?"🌟 大成功！！ ":"✅ ")+t.name+"で"+STAT_LABEL[t.stat]+" +"+gain+"！",sub:"疲労 +"+t.fat,senpai:crit?{m:"happy",t:"いいぞ！その伸びだ！その調子で食らいついてこい！"}:pick(SENPAI_TRAIN)};}
+    else{c.fatigue=clamp(c.fatigue+t.fat,0,100);res={crit:false,text:"🛌 ゆっくり休んで疲労がスッキリ回復！",sub:"体調を整えるのもプロの仕事",senpai:{m:"calm",t:"休むのも実力のうちだ。無理して怪我したら元も子もねえからな。"}};}
+    c.trainLeft=Math.max(0,c.trainLeft-1);setCareer(c);saveGame(c);return res;
+  };
+
+  const doBuy=(item,price)=>{
+    const pay=price!=null?price:item.price;
+    let c={...career,stats:{...career.stats},owned:[...(career.owned||[])]};
+    c.money-=pay;c.owned.push(item.id);
+    if(item.stat)c.stats[item.stat]=clamp(c.stats[item.stat]+item.bonus,0,120);
+    if(item.stat2)c.stats[item.stat2]=clamp(c.stats[item.stat2]+item.bonus2,0,120);
+    setCareer(c);saveGame(c);beep(1046,0.2,0.08,"sine");
+  };
+
+  const goRace=mode=>{const ctx=buildRace(career);setRaceCtx(ctx);setRaceMode(mode);setVsOpp(null);setVsGhost(false);if(mode==="real"&&!career.entryTipDone)setEntryTip(true);bgm.start("theme");setScreen("entry");};
+
+  const startVersus=(opp,ghost)=>{setVsOpp(opp);setVsGhost(!!ghost);const ctx=buildVersusRace(career,opp);setRaceCtx(ctx);setRaceMode("versus");bgm.start("theme");setScreen("entry");};
+
+  const closeEntryTip=()=>{const c={...career,entryTipDone:true};setCareer(c);saveGame(c);setEntryTip(false);};
+
+  const startRace=strat=>{setStrategy(strat);setRaceKey(k=>k+1);setScreen("race");};
+
+  const onRaceFinish=(resList,teleData)=>{
+    setResults(resList);setTele(teleData);
+    const me=resList.find(r=>r.isP);const place=me.place;
+    const agari=computeAgari(teleData,career.stats);
+    if(raceMode==="versus"){
+      const oppRider=resList.find(r=>r.isOpp);
+      const oppPlace=oppRider?oppRider.place:9;
+      const outcome=place<oppPlace?"win":"lose";
+      let c={...career,vs:{w:(career.vs&&career.vs.w)||0,l:(career.vs&&career.vs.l)||0}};
+      if(!vsGhost){if(outcome==="win")c.vs.w++;else c.vs.l++;}
+      setCareer(c);saveGame(c);
+      submitVsRun(c,agari.time); // 自分の記録をプールへ登録（相手のstats込み）
+      setVsResult({outcome,myPlace:place,oppPlace,myAgari:agari.time,oppName:vsOpp?vsOpp.name:(oppRider?oppRider.name:""),ghost:vsGhost});
+      bgm.start(outcome==="win"?"victory":"theme");setScreen("vsresult");return;
+    }
+    if(raceMode==="mock"){setGains({gpWin:false,agari:agari.time});bgm.start("theme");setScreen("interview");return;}
+    const prevRank=career.rank;const pts=Math.round(PLACE_PTS[place-1]*RANK_MULT[prevRank]);const money=Math.round(PLACE_MONEY[place-1]*RANK_MULT[prevRank]);const statKey=pick(["pow","spd","sta","tec"]);const statAmt=place<=3?2:1;
+    let c={...career,stats:{...career.stats},rec:{...career.rec}};
+    c.stats[statKey]=clamp(c.stats[statKey]+statAmt,0,120);c.money+=money;c.rec.races+=1;if(place===1)c.rec.wins+=1;if(place<=3)c.rec.podium+=1;c.fatigue=clamp(c.fatigue+12,0,100);c.trainLeft=3;
+    if(!c.tutorialDone)c={...c,tutorialDone:true};
+    const prevBest=c.bestAgari;
+    let agariPB=false;
+    if(prevBest==null||agari.time<prevBest){c.bestAgari=agari.time;agariPB=true;}
+    let newPoints=c.points+pts,promoted=null,rank=c.rank;
+    while(rank!=="SS"&&newPoints>=RANK_REQ[rank]){newPoints-=RANK_REQ[rank];rank=RANKS[RANKS.indexOf(rank)+1];promoted=rank;}
+    c.points=newPoints;c.rank=rank;
+    let gpWin=false;if(raceCtx.isGP&&place===1){gpWin=true;c.rec.gp+=1;}
+    setCareer(c);saveGame(c);
+    if(agariPB)submitRanking(c);
+    setGains({pts,money,statKey,statAmt,promoted,gpWin,prevRank:rank,newPoints,agari:agari.time,agariPB,agariBest:c.bestAgari});
+    bgm.start("theme");setScreen("interview");
+  };
+
+  const onReset=async()=>{await deleteSave();setCareer(null);setSavedData(null);setHasSave(false);bgm.stop();setScreen("title");};
+
+  const goHomeFromResult=()=>{
+    let show=false;
+    setCareer(prev=>{
+      if(!prev)return prev;
+      const n=((prev.homeReturns||0)+1);
+      show=(n%3===0);
+      const c={...prev,homeReturns:n};saveGame(c);return c;
+    });
+    if(show)setShowAd(true);else setScreen("home");
+  };
+  const closeAd=()=>{setShowAd(false);setScreen("home");};
+
+  return(
+    <div className="app"><style>{CSS}</style>
+      <div className="frame">
+        {showAd&&<InterstitialAd onClose={closeAd}/>}
+        {screen==="title"&&<TitleScreen hasSave={hasSave} onNew={onNew} onContinue={onContinue}/>}
+        {screen==="intro"&&<IntroScreen onDone={onIntroDone}/>}
+        {screen==="create"&&<CreateScreen onDone={onCreate}/>}
+        {screen==="senpai"&&career&&<SenpaiIntroScreen career={career} onDone={onSenpaiDone}/>}
+        {screen==="home"&&career&&<HomeScreen career={career} onTrain={()=>setScreen("training")} onRace={()=>goRace("real")} onMock={()=>goRace("mock")} onShop={()=>setScreen("shop")} onRanking={()=>setScreen("ranking")} onVersus={()=>setScreen("versus")} onReset={onReset}/>}
+        {screen==="training"&&career&&<TrainingScreen career={career} onPick={doTrain} onBack={()=>setScreen("home")}/>}
+        {screen==="shop"&&career&&<ShopScreen career={career} onBuy={doBuy} onBack={()=>setScreen("home")}/>}
+        {screen==="ranking"&&career&&<RankingScreen career={career} onBack={()=>setScreen("home")}/>}
+        {screen==="versus"&&career&&<OnlineVersusScreen career={career} onStartVersus={startVersus} onBack={()=>setScreen("home")}/>}
+        {screen==="entry"&&career&&raceCtx&&<EntryScreen career={career} ctx={raceCtx} mode={raceMode} onStart={startRace} onBack={()=>setScreen(raceMode==="versus"?"versus":"home")} showTip={entryTip} onTipClose={closeEntryTip}/>}
+        {screen==="race"&&career&&raceCtx&&strategy&&<RaceScreen key={raceKey} ctx={raceCtx} career={career} strategy={strategy} mode={raceMode} onFinish={onRaceFinish}/>}
+        {screen==="interview"&&results&&<WinnerInterviewScreen results={results} isPlayerWon={results[0]?.isP} career={career} onDone={()=>setScreen("result")}/>}
+        {screen==="result"&&results&&gains&&<ResultScreen results={results} gains={gains} career={career} tele={tele} isMock={raceMode==="mock"} onHome={goHomeFromResult} onEnding={()=>setScreen("ending")}/>}
+        {screen==="vsresult"&&results&&vsResult&&<VersusResultScreen results={results} vsResult={vsResult} career={career} onAgain={()=>setScreen("versus")} onHome={()=>setScreen("home")}/>}
+        {screen==="ending"&&career&&<EndingScreen career={career} onClose={()=>setScreen("home")}/>}
+      </div>
+    </div>
+  );
+}
+
+// ─── CSS ──────────────────────────────────────────────────────
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+.app{min-height:100vh;background:#060a14;display:flex;justify-content:center;font-family:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;color:#e8ecf6;user-select:none;-webkit-user-select:none;}
+.frame{width:100%;max-width:480px;min-height:100vh;background:linear-gradient(180deg,#090f1e 0%,#0c1224 100%);position:relative;overflow:hidden;}
+.screen{min-height:100vh;display:flex;flex-direction:column;}
+.screen.center{justify-content:center;align-items:center;padding:24px 20px;}
+.screen.pad{padding:18px 16px 36px;}
+.screen.race{padding:0 0 16px;}
+.h2{font-family:'DotGothic16',sans-serif;font-size:21px;margin:2px 2px 12px;letter-spacing:1px;}
+.mini{font-size:11.5px;}.dim{color:#8d9cbe;}.bold{font-weight:700;}.em{color:#ffd34d;font-weight:700;}.plus{color:#7ee08a;}.money{color:#ffd34d;font-weight:700;}
+.orange{color:#f0a05a;}.green{color:#7ee08a;}
+.rowbetween{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.card{background:#131c33;border:1px solid #283655;border-radius:14px;padding:14px;margin-bottom:12px;}
+.card.gold{background:#2a2310;border-color:#806a23;}
+.btn{border:none;border-radius:14px;font-family:inherit;font-weight:700;cursor:pointer;padding:10px 16px;font-size:14px;color:#e8ecf6;background:#283655;transition:transform .06s;line-height:1.4;}
+.btn:active{transform:scale(.97);}.btn.big{width:100%;padding:15px;font-size:16px;}
+.btn.primary{background:linear-gradient(135deg,#e8442e,#d12a55);box-shadow:0 4px 16px rgba(232,68,46,.35);}
+.btn.ghost{background:#1a2440;border:1px solid #34456e;}
+.btn.race{background:linear-gradient(135deg,#e8442e,#f0892e);box-shadow:0 4px 14px rgba(232,68,46,.3);color:#fff;}
+.btn.danger{background:#b03030;}.btn:disabled{opacity:.4;}
+.btnrow{display:flex;gap:10px;margin-top:10px;}.btn.half{flex:1;font-size:13px;padding:13px 8px;}
+.linkbtn{background:none;border:none;color:#5f7099;font-size:11px;text-decoration:underline;cursor:pointer;}
+.pulse{animation:pulse 1.6s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 4px 16px rgba(232,68,46,.35);}50%{box-shadow:0 4px 26px rgba(232,68,46,.7);}}
+
+.titlescreen{position:relative;overflow:hidden;}
+.flamebg{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+.flame{position:absolute;bottom:-28px;border-radius:50% 50% 48% 48%/64% 64% 36% 36%;background:linear-gradient(to top,#ffd34d 0%,#ff8a2e 38%,#e8442e 70%,rgba(209,42,46,0) 100%);filter:blur(5px);opacity:.82;transform-origin:bottom center;animation:flameUp 1.3s ease-in-out infinite;mix-blend-mode:screen;}
+@keyframes flameUp{0%,100%{transform:scaleY(1) scaleX(1) translateY(0);opacity:.78;}25%{transform:scaleY(1.28) scaleX(.86) translateY(-8px);opacity:.95;}55%{transform:scaleY(.82) scaleX(1.12) translateY(2px);opacity:.7;}75%{transform:scaleY(1.16) scaleX(.92) translateY(-5px);opacity:.9;}}
+.flameglow{position:absolute;left:0;right:0;bottom:0;height:46%;background:radial-gradient(ellipse at 50% 120%,rgba(232,68,46,.55),rgba(232,68,46,0) 70%);}
+.titlewrap{text-align:center;width:100%;max-width:380px;position:relative;z-index:2;}
+.zoomstart{opacity:0;transform:scale(2.6);}
+.zoomin{animation:zoomIn 1.1s cubic-bezier(.2,.8,.2,1) forwards;}
+@keyframes zoomIn{0%{opacity:0;transform:scale(2.6);filter:blur(6px);}60%{opacity:1;filter:blur(0);}100%{opacity:1;transform:scale(1);}}
+.titletag{display:inline-block;font-size:11px;background:rgba(26,36,64,.7);border:1px solid #34456e;padding:4px 12px;border-radius:99px;color:#cfd9f0;margin-bottom:14px;}
+.gametitle{font-family:'DotGothic16',sans-serif;font-size:52px;margin:0;letter-spacing:3px;font-weight:400;}
+.flametitle{position:relative;background:linear-gradient(to top,#ff6a1a 0%,#ffd34d 45%,#fff5cc 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none;filter:drop-shadow(0 0 18px rgba(255,138,46,.7));animation:titleFlicker 2.4s ease-in-out infinite;}
+@keyframes titleFlicker{0%,100%{filter:drop-shadow(0 0 18px rgba(255,138,46,.7)) brightness(1);}45%{filter:drop-shadow(0 0 28px rgba(255,180,60,.9)) brightness(1.18);}70%{filter:drop-shadow(0 0 14px rgba(255,100,40,.6)) brightness(.92);}}
+.titlesub{color:#ffcaa0;font-size:14px;margin-top:8px;letter-spacing:3px;font-weight:700;}
+.flamesub{text-shadow:0 0 12px rgba(232,68,46,.5);}
+.titledots{margin:22px 0 26px;display:flex;justify-content:center;gap:7px;}
+.titledot{width:15px;height:15px;border-radius:50%;border:1.5px solid #0b0e18;animation:bounce 1.4s infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
+.titlebtns{display:flex;flex-direction:column;gap:10px;}.titlefoot{margin-top:22px;font-size:11.5px;color:#aeb9d6;line-height:1.9;}
+.endtrophy{font-size:64px;animation:bounce 1.6s infinite;position:relative;z-index:2;}
+
+.intro{position:relative;}
+.skipbtn{position:absolute;top:18px;right:16px;background:rgba(26,36,64,.8);border:1px solid #34456e;color:#cfd9f0;font-size:12px;font-weight:700;padding:8px 14px;border-radius:99px;cursor:pointer;z-index:5;}
+.introcard{width:100%;max-width:380px;text-align:center;animation:popin .35s;}
+.introicon{font-size:60px;margin-bottom:14px;}.introtitle{font-family:'DotGothic16',sans-serif;font-size:24px;color:#ffd34d;margin-bottom:12px;}
+.introbody{font-size:14px;line-height:1.95;color:#dbe3f5;padding:0 6px;}
+.introdots{display:flex;gap:8px;margin:26px 0 18px;}.idot{width:9px;height:9px;border-radius:50%;background:#2a3550;transition:all .3s;}.idot.on{background:#ffd34d;width:24px;border-radius:99px;}
+.introbtns{width:100%;max-width:380px;}
+@keyframes popin{from{transform:scale(.85);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+.fieldlabel{font-size:13px;font-weight:700;color:#b9c6e2;}
+.textinput{width:100%;margin-top:8px;padding:13px;border-radius:12px;border:1px solid #34456e;background:#0d1426;color:#fff;font-size:16px;font-family:inherit;}
+.regiongrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+.regionbtn{display:flex;align-items:center;justify-content:center;gap:4px;background:#131c33;border:1.5px solid #283655;border-radius:10px;padding:9px 2px;color:#c3cee8;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;}
+.regionbtn.sel{background:#0d1426;}.regiondot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.stylecard{display:block;width:100%;text-align:left;background:#131c33;border:1.5px solid #283655;border-radius:14px;padding:13px;margin-bottom:9px;color:inherit;font-family:inherit;cursor:pointer;}
+.stylecard.sel{border-color:#e8442e;background:#1d1626;}
+.stylehead{display:flex;justify-content:space-between;align-items:center;}.stylename{font-weight:700;font-size:16px;}.selmark{color:#ff8a73;font-size:12px;font-weight:700;}
+.styledesc{font-size:12px;color:#9fb0d0;margin-top:5px;line-height:1.6;}.strathint{font-size:11.5px;color:#ffd34d;margin-top:6px;}
+
+.senpaibox{display:flex;gap:10px;align-items:flex-start;}
+.senpaiface{font-size:38px;flex-shrink:0;width:54px;height:54px;display:flex;align-items:center;justify-content:center;background:#1a2440;border:2px solid #3a4c7a;border-radius:14px;}
+.senpaiface.big{font-size:52px;width:74px;height:74px;}
+.senpaibubble{flex:1;background:#141e38;border:1.5px solid #3a4c7a;border-radius:14px;border-top-left-radius:4px;padding:10px 13px;}
+.senpainame{font-size:11px;font-weight:800;color:#ff8a73;margin-bottom:3px;}.senpaitag{font-size:9px;background:#3a2418;color:#ffb088;padding:1px 6px;border-radius:99px;margin-left:6px;}
+.senpaitext{font-size:13px;line-height:1.7;color:#e6ecfa;}
+
+.reporterbox{display:flex;gap:10px;align-items:flex-start;}
+.reporterface{font-size:36px;flex-shrink:0;width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:#1a2440;border:2px solid #3a4c7a;border-radius:14px;}
+.reporterbubble{flex:1;background:#0e1c30;border:1.5px solid #2a4060;border-radius:14px;border-top-left-radius:4px;padding:10px 13px;}
+.reportername{font-size:11px;font-weight:800;color:#7ee0ff;margin-bottom:3px;}.reportertext{font-size:13px;line-height:1.7;color:#cfe3fa;}
+
+.homeheader{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.homename{font-family:'DotGothic16',sans-serif;font-size:24px;}
+.homerank{display:flex;gap:6px;margin-top:5px;align-items:center;flex-wrap:wrap;}
+.rankbadge{background:linear-gradient(135deg,#e8442e,#d12a55);font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;}
+.stylebadge{background:#283655;font-size:11px;padding:3px 9px;border-radius:99px;}
+.regionbadge{font-size:11px;font-weight:700;}
+.condbox{border:1.5px solid;border-radius:12px;padding:6px 12px;text-align:center;}.condicon{font-size:19px;}.condlabel{font-size:10.5px;font-weight:700;}
+.statrow{display:flex;align-items:center;gap:9px;margin:7px 0;}
+.statlabel{width:64px;font-size:12px;color:#9fb0d0;}
+.statbarbg{flex:1;height:9px;background:#0d1426;border-radius:99px;overflow:hidden;}
+.statbarfill{height:100%;border-radius:99px;transition:width .4s;}.statval{width:30px;text-align:right;font-weight:700;font-size:13px;}
+.progbg{height:11px;background:#0d1426;border-radius:99px;overflow:hidden;margin-top:6px;}
+.progfill{height:100%;background:linear-gradient(90deg,#e8442e,#ffd34d);border-radius:99px;transition:width .8s;}
+
+.traincard{display:flex;width:100%;gap:12px;align-items:center;text-align:left;background:#131c33;border:1px solid #283655;border-radius:14px;padding:13px;margin-bottom:9px;color:inherit;font-family:inherit;cursor:pointer;}
+.traincard:active{background:#1a2440;}.trainicon{font-size:26px;}
+.trainbody{display:flex;flex-direction:column;gap:3px;}.trainresult{animation:popin .35s;}
+
+.catbar{display:flex;gap:7px;margin-bottom:14px;overflow-x:auto;}
+.catbtn{flex-shrink:0;background:#131c33;border:1.5px solid #283655;border-radius:99px;padding:8px 14px;color:#c3cee8;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.catbtn.sel{background:#1d1626;border-color:#e8442e;color:#ff8a73;}
+.shopitem{display:flex;gap:12px;align-items:center;background:#131c33;border:1px solid #283655;border-radius:14px;padding:12px;margin-bottom:10px;}
+.shopitem.owned{opacity:.6;}.shopicon{font-size:28px;flex-shrink:0;}
+.shopbody{flex:1;min-width:0;}.shopname{font-size:14px;font-weight:700;}.shopdesc{font-size:11.5px;color:#9fb0d0;margin-top:3px;line-height:1.5;}
+.shopbonus{font-size:11px;color:#7ee08a;margin-top:4px;font-weight:700;}
+.shopright{flex-shrink:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.shopprice{font-size:13px;font-weight:700;color:#ffd34d;}.shopbuy{padding:8px 12px;font-size:13px;}.shopowned{font-size:11px;color:#7ee08a;font-weight:700;padding:4px 0;}
+.shopitem.soldout{opacity:.5;}.shopitem.deal{border-color:#e8442e;background:#1f1622;}
+.dealtag{font-size:9px;background:#e8442e;color:#fff;padding:1px 6px;border-radius:99px;margin-right:5px;font-weight:700;}
+.oldprice{font-size:11px;color:#7a8299;text-decoration:line-through;margin-right:3px;}
+.shopsoldout{font-size:11px;color:#8d9cbe;font-weight:700;padding:4px 0;}
+
+.rankhero{display:flex;justify-content:space-between;align-items:flex-end;background:#131c33;border:1px solid #283655;border-radius:14px;padding:14px 16px;margin-bottom:12px;}
+.rankbig{font-family:'DotGothic16',sans-serif;font-size:34px;color:#7ee0ff;line-height:1.1;}
+.rankpos{font-family:'DotGothic16',sans-serif;font-size:30px;color:#ffd34d;line-height:1.1;}
+.ranksec{font-size:14px;margin-left:2px;}
+.rankrow{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:9px;}
+.rankrow.me{background:linear-gradient(90deg,#2a2310,#1f1d12);border:1px solid #c9a227;}
+.rankno{width:26px;text-align:right;font-weight:800;font-size:13px;color:#8d9cbe;}
+.rankmedal{width:18px;font-size:13px;}
+.rankname{flex:1;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rankrow.me .rankname{font-weight:800;color:#ffd34d;}
+.ranktime{font-family:'DotGothic16',sans-serif;font-size:15px;color:#cfe3fa;}
+.rankrow.me .ranktime{color:#ffd34d;}
+.rankgap{text-align:center;color:#5a6c98;font-size:14px;padding:2px 0;letter-spacing:2px;}
+.rankbadge2{font-size:9.5px;color:#cfd9f0;background:#283655;padding:2px 7px;border-radius:99px;white-space:nowrap;}
+.rankrow.me .rankbadge2{background:#5a4a1a;color:#ffd9a0;}
+
+.agaribox{margin-top:10px;background:#0e1c2e;border:1px solid #234058;border-radius:11px;padding:10px 12px;}
+.agaritime{font-family:'DotGothic16',sans-serif;font-size:22px;color:#7ee0ff;}
+.agaripb{margin-top:6px;font-size:12px;color:#ffd34d;font-weight:700;line-height:1.6;}
+
+.lineband{display:flex;align-items:center;gap:8px;padding:6px 12px 2px;}
+.lineband-label{font-size:10px;font-weight:800;color:#8d9cbe;flex-shrink:0;letter-spacing:1px;}
+.lineband-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;}
+.lineband-grp{display:flex;align-items:center;gap:3px;border:1.5px solid;border-radius:9px;padding:3px 6px 3px 5px;flex-shrink:0;background:#10182c;}
+.lineband-grp.solo{background:#1a1608;}
+.lineband-region{font-size:9.5px;font-weight:700;margin-right:2px;}
+.lineband-chip{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:5px;font-size:11px;font-weight:800;border:1px solid;}
+.lineband-chip.me{box-shadow:0 0 0 2px #ffd34d;}
+
+.racead-adsense{width:100%;min-height:50px;background:#0a1120;overflow:hidden;}
+.adnote{font-size:10px;color:#5a6c98;text-align:center;padding:6px 12px;background:#10182c;}
+.adbody-adsense{min-height:250px;background:#0a1120;display:flex;align-items:center;justify-content:center;}
+
+.linegroup{border:1.5px solid;border-radius:13px;padding:9px 11px;margin-bottom:9px;background:#10182c;}
+.linehead{font-size:11px;font-weight:700;margin-bottom:5px;letter-spacing:1px;}
+.riderrow{display:flex;align-items:center;gap:9px;padding:5px 2px;}.riderrow.me{background:#2a2310;border-radius:9px;padding:5px 7px;}
+.riderrow.opp{background:#2a1620;border:1px solid #7a3050;border-radius:9px;padding:5px 7px;}.riderrow.opp .ridername{color:#ff8a73;font-weight:700;}
+.carchip{display:inline-flex;align-items:center;justify-content:center;border-radius:7px;font-weight:800;flex-shrink:0;}
+.ridername{flex:1;font-size:13px;font-weight:500;}.riderstyle{font-size:11px;color:#9fb0d0;background:#283655;padding:2px 7px;border-radius:99px;}
+.riderstars{font-size:10px;color:#ffd34d;letter-spacing:1px;}.placecell{width:38px;font-weight:800;font-size:13px;color:#ffd34d;}
+
+.racetop{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 6px;}
+.racemode{font-size:13px;font-weight:800;color:#ffd34d;}.racestrat{font-size:11.5px;color:#9fb0d0;}
+.racevenue{font-size:11px;color:#9fb0d0;flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.vsturn{font-family:'DotGothic16',sans-serif;font-size:26px;}
+.vsbike{font-size:54px;width:96px;height:96px;display:flex;align-items:center;justify-content:center;border:3px solid;border-radius:24px;background:#10182c;}
+.vsbigtime{font-family:'DotGothic16',sans-serif;font-size:52px;line-height:1.1;}
+.sweepbar{position:relative;width:100%;max-width:340px;height:42px;background:#10182c;border:1.5px solid #283655;border-radius:12px;overflow:hidden;}
+.sweepzone{position:absolute;left:calc(50% - 26px);top:0;bottom:0;width:52px;background:linear-gradient(90deg,rgba(126,224,138,0.15),rgba(126,224,138,0.4),rgba(126,224,138,0.15));border-left:2px solid #7ee08a;border-right:2px solid #7ee08a;}
+.sweepmarker{position:absolute;top:3px;bottom:3px;width:6px;border-radius:3px;background:#ffd34d;box-shadow:0 0 10px rgba(255,211,77,0.8);animation:sweep 1.1s linear infinite alternate;}
+@keyframes sweep{from{left:4px;}to{left:calc(100% - 10px);}}
+.vsmashtimerwrap{width:100%;max-width:320px;height:7px;background:#0d1426;border-radius:99px;overflow:hidden;margin:14px 0 4px;}
+.vsmashtimer{height:100%;width:100%;border-radius:99px;background:#ffd34d;animation:mashtimer 3s linear forwards;}
+@keyframes mashtimer{from{width:100%;}to{width:0%;}}
+.vswinner{font-family:'DotGothic16',sans-serif;font-size:30px;color:#ffd34d;text-align:center;text-shadow:0 0 18px rgba(255,211,77,0.5);}
+.vscompare{display:flex;align-items:center;gap:12px;margin-top:24px;}
+.vscol{background:#131c33;border:1.5px solid #283655;border-radius:16px;padding:16px 18px;text-align:center;min-width:96px;}
+.vscol.win{border-color:#c9a227;background:#2a2310;box-shadow:0 4px 18px rgba(201,162,39,0.3);}
+.vscolname{font-size:12px;font-weight:700;margin-bottom:6px;}
+.vscoltime{font-family:'DotGothic16',sans-serif;font-size:30px;color:#fff;line-height:1.1;}
+.vsvs{font-family:'DotGothic16',sans-serif;font-size:18px;color:#5a6c98;}
+.vsrecord{font-size:11px;font-weight:700;color:#9fb0d0;background:#1a2440;border:1px solid #34456e;border-radius:99px;padding:3px 10px;}
+.vsoppcard{margin-top:12px;background:#131c33;border:1.5px solid #3a4c7a;border-radius:18px;padding:18px 22px;text-align:center;animation:popin .35s;}
+.vsoppava{font-size:46px;line-height:1;}
+.vsoppname{font-family:'DotGothic16',sans-serif;font-size:20px;margin-top:6px;}
+.vsoppmeta{margin-top:8px;display:flex;align-items:center;justify-content:center;}
+.vsoppghost{margin-top:10px;font-size:13px;color:#5a6c98;letter-spacing:1px;}
+
+.adoverlay{position:fixed;inset:0;background:rgba(3,5,10,0.92);display:flex;align-items:center;justify-content:center;padding:20px;z-index:200;animation:popin .25s;}
+.adcard{width:100%;max-width:360px;background:#0c1120;border:1px solid #283655;border-radius:18px;overflow:hidden;}
+.adbar{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#10182c;}
+.adlabel{font-size:10px;font-weight:800;color:#8d9cbe;background:#0a1120;border:1px solid #34456e;border-radius:4px;padding:2px 7px;letter-spacing:1px;}
+.adcount{font-size:13px;font-weight:800;color:#8d9cbe;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:2px solid #34456e;border-radius:50%;}
+.adclose{background:#283655;border:none;color:#e8ecf6;font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px;cursor:pointer;}
+.adbody{padding:34px 20px;text-align:center;}
+.adicon{font-size:54px;line-height:1;}
+.adtitle{font-family:'DotGothic16',sans-serif;font-size:26px;margin-top:12px;letter-spacing:1px;}
+.adsub{font-size:12px;opacity:0.85;margin-top:8px;}
+.adcta{display:inline-block;margin-top:18px;background:rgba(0,0,0,0.25);border:1.5px solid rgba(255,255,255,0.5);color:inherit;font-size:13px;font-weight:700;padding:8px 20px;border-radius:99px;}
+.adnote{font-size:10px;color:#5a6c98;text-align:center;padding:9px 12px;background:#10182c;}
+.canvaswrap{position:relative;}.canvaswrap canvas{display:block;width:100%;}
+.banner{position:absolute;top:34%;left:0;right:0;text-align:center;animation:bannerin .3s;pointer-events:none;}
+@keyframes bannerin{from{transform:scale(1.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+.bannermain{font-family:'DotGothic16',sans-serif;font-size:30px;color:#ffd34d;text-shadow:0 2px 14px rgba(0,0,0,.9),0 0 24px rgba(255,211,77,.5);letter-spacing:2px;}
+.bannersub{font-size:13px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.9);margin-top:3px;}
+.feed{position:absolute;left:8px;bottom:58px;right:8px;pointer-events:none;}
+.feedline{font-size:11.5px;color:#fff;background:rgba(8,12,24,.7);border-left:2px solid #ff8a73;padding:3px 8px;border-radius:4px;margin-top:3px;display:inline-block;animation:feedin .25s;text-shadow:0 1px 4px rgba(0,0,0,.8);}
+@keyframes feedin{from{transform:translateX(-12px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.phaselabel{text-align:center;font-size:12px;color:#ffd34d;padding:6px 12px 2px;font-weight:700;}
+.stamwrap{display:flex;align-items:center;gap:9px;padding:6px 16px 4px;}
+.stambg{flex:1;height:15px;background:#0d1426;border:1px solid #283655;border-radius:99px;overflow:hidden;}
+.stamfill{height:100%;border-radius:99px;transition:width .15s,background .3s;}.draftind{font-size:10.5px;color:#7ee0ff;width:64px;transition:opacity .3s;}
+.controls{padding:8px 16px 0;min-height:172px;}
+.posrow{display:flex;gap:9px;margin-bottom:9px;}
+.posbtn{flex:1;background:#1a2440;border:1.5px solid #34456e;border-radius:14px;color:#fff;font-size:19px;font-weight:800;padding:13px 4px;font-family:inherit;cursor:pointer;line-height:1.4;}
+.posbtn:active{background:#34456e;}.poscenter{width:86px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.5;}
+.spurtwait{text-align:center;padding:13px;background:#10182c;border-radius:12px;line-height:1.7;}
+.spurtbtn{width:100%;padding:19px;border:none;border-radius:16px;font-family:'DotGothic16',sans-serif;font-size:25px;letter-spacing:2px;color:#fff;background:linear-gradient(135deg,#e8442e,#d12a55);box-shadow:0 4px 22px rgba(232,68,46,.55);cursor:pointer;animation:pulse 1.1s infinite;}
+.mashzone{text-align:center;cursor:pointer;padding-top:4px;}
+.sprinter{margin:0 auto;width:168px;height:148px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 40% 30%,#ff7a5c,#e8442e 55%,#b51f3c);box-shadow:0 5px 26px rgba(232,68,46,.6);}
+.sprbike{font-size:62px;line-height:1;filter:drop-shadow(0 3px 5px rgba(0,0,0,.4));transition:transform .06s;}
+.sprpush{font-family:'DotGothic16',sans-serif;font-size:26px;color:#fff;letter-spacing:2px;margin-top:2px;}
+.sprinter.a .sprbike{transform:translateX(-7px) rotate(-7deg) scale(1.04);}
+.sprinter.b .sprbike{transform:translateX(7px) rotate(7deg) scale(1.04);}
+
+.interviewtag{display:inline-block;background:linear-gradient(135deg,#e8442e,#d12a55);font-size:12px;font-weight:700;padding:5px 14px;border-radius:99px;margin-bottom:14px;letter-spacing:1px;}
+.wincard{background:#1a2438;border:1.5px solid #c9a227;border-radius:16px;padding:16px;text-align:center;margin-bottom:4px;}
+
+.resulthero{text-align:center;padding:19px;border-radius:16px;background:#131c33;border:1px solid #283655;margin-bottom:12px;}
+.resulthero.podium{background:#1d2a18;border-color:#4a7a3a;}.resulthero.win{background:#2a2310;border-color:#c9a227;animation:popin .4s;}
+.resultplace{font-family:'DotGothic16',sans-serif;font-size:52px;color:#ffd34d;line-height:1.1;}.resultchaku{font-size:22px;margin-left:3px;}
+.promo{animation:popin .45s;}
+
+.overlay{position:fixed;inset:0;background:rgba(4,7,14,.78);display:flex;align-items:center;justify-content:center;padding:22px;z-index:50;}
+.tutcard{width:100%;max-width:400px;background:#141e38;border:1.5px solid #3a4c7a;border-radius:18px;padding:20px;animation:popin .3s;}
+.tutstep{font-size:10.5px;color:#ff8a73;font-weight:800;letter-spacing:2px;margin-bottom:5px;}
+.tuttitle{font-family:'DotGothic16',sans-serif;font-size:21px;color:#ffd34d;margin-bottom:9px;}
+.tutbody{font-size:13.5px;line-height:1.9;color:#dbe3f5;margin-bottom:13px;}
+.tutunlock{font-size:11.5px;color:#7ee0ff;background:#0e2233;border-radius:9px;padding:8px 11px;margin-bottom:13px;}
+`;
+
+
+ReactDOM.createRoot(document.getElementById("game-root")).render(React.createElement(App));
+
+</script>
+
+<script>
+// AdSense
+(adsbygoogle=window.adsbygoogle||[]).push({});
+</script>
+</body>
+</html>
